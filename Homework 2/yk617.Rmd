@@ -1,0 +1,68 @@
+---
+title: "Homework 2"
+author: "Yasasvi"
+date: "2024-02-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r F1}
+library(ggplot2)
+library(dplyr)
+library(readr)
+
+# Read the datasets
+qualifying <- read.csv("D:/MVA/Data/archive/qualifying.csv")
+drivers <- read.csv("D:/MVA/Data/archive/drivers.csv")
+constructors <- read.csv("D:/MVA/Data/archive/constructors.csv")
+races <- read.csv("D:/MVA/Data/archive/races.csv")
+results <- read.csv("D:/MVA/Data/archive/results.csv")
+
+# Filter specific driver and constructor IDs
+selected_driver_ids <- c(1, 14, 815, 830, 844, 832, 8, 847, 846, 817, 30, 102, 95, 848, 852, 855, 858, 822, 825, 807, 857, 840, 842, 839, 20, 14, 13, 18)
+selected_constructor_ids <- c(1, 3, 4, 5, 6, 9, 10, 15, 211, 32, 164, 213, 17, 22, 131, 23, 53, 210, 117, 214, 209, 2, 16, 11)
+
+filtered_qualifying <- subset(qualifying, driverId %in% selected_driver_ids)
+filtered_constructors <- subset(constructors, constructorId %in% selected_constructor_ids)
+
+results$podium <- ifelse(results$positionOrder <= 3, "Podium", "Non-Podium")
+
+# Merge datasets
+data <- merge(merge(merge(merge(filtered_qualifying, drivers, by = "driverId"), filtered_constructors, by = "constructorId"), races, by = "raceId"), results, by = "raceId")
+
+# Univariate visualization - Driver nationality
+ggplot(data, aes(x = nationality.x, fill = podium)) +
+  geom_bar() +
+  labs(title = "Distribution of Podium Finishes by Driver Nationality")
+
+# Univariate visualization - Circuit type
+ggplot(data, aes(x = name.x, fill = podium)) +
+  geom_bar() +
+  labs(title = "Distribution of Podium Finishes by Circuit Type") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Adjust x-axis labels for better visibility
+
+# Remove rows with missing or non-finite values in q3
+data <- data[complete.cases(data$q3), ]
+
+# Convert q3 to character type and remove non-numeric characters
+data$q3 <- gsub("[^0-9.]", "", as.character(data$q3))
+
+# Convert q3 to numeric
+data$q3 <- as.numeric(data$q3)
+
+# Create density plot
+ggplot(data, aes(x = q3, fill = podium)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Density Plot of Q3 Qualifying Times by Podium Status") +
+  scale_x_continuous(name = "Q3 Qualifying Time") +
+  scale_fill_manual(values = c("blue", "red"), labels = c("Podium", "Non-Podium"))
+
+# Multivariate visualization - Driver performance, Constructor performance, and Circuit type
+ggplot(data, aes(x = position, y = resultID, color = podium)) +
+  geom_point() +
+  facet_wrap(~name.x) +
+  labs(title = "Driver Performance vs. Constructor Performance by Circuit Type")
+```
