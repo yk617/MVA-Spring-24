@@ -1,55 +1,75 @@
+# Load required library
 library(ggplot2)
 library(dplyr)
-library(readr)
+library(GGally)
 
-# Read the datasets
-qualifying <- read.csv("D:/MVA/Data/archive/qualifying.csv")
-drivers <- read.csv("D:/MVA/Data/archive/drivers.csv")
-constructors <- read.csv("D:/MVA/Data/archive/constructors.csv")
-races <- read.csv("D:/MVA/Data/archive/races.csv")
-results <- read.csv("D:/MVA/Data/archive/results.csv")
+#Univariate Analysis
+#1. Question: What is the distribution of log-transformed weekly sales?
+  
+#  Visualization: Histogram of Log-transformed Weekly Sales
 
-# Filter specific driver and constructor IDs
-selected_driver_ids <- c(1, 14, 815, 830, 844, 832, 8, 847, 846, 817, 30, 102, 95, 848, 852, 855, 858, 822, 825, 807, 857, 840, 842, 839, 20, 14, 13, 18)
-selected_constructor_ids <- c(1, 3, 4, 5, 6, 9, 10, 15, 211, 32, 164, 213, 17, 22, 131, 23, 53, 210, 117, 214, 209, 2, 16, 11)
+# Histogram of Log-transformed Weekly Sales
+ggplot(Walmart_sales, aes(x = log(Weekly_Sales))) +
+  geom_histogram(binwidth = 0.2, fill = "skyblue", color = "black") +
+  labs(title = "Distribution of Log-transformed Weekly Sales",
+       x = "Log(Weekly Sales)",
+       y = "Frequency") +
+  theme_minimal()
 
-filtered_qualifying <- subset(qualifying, driverId %in% selected_driver_ids)
-filtered_constructors <- subset(constructors, constructorId %in% selected_constructor_ids)
+#Insight:
+  
+#  The histogram of log-transformed weekly sales provides a clearer view of the distribution compared to the original exponential scale.
 
-results$podium <- ifelse(results$positionOrder <= 3, "Podium", "Non-Podium")
+########################################################################################################
+#Bivariate Analysis
+#2. Question: How do log-transformed weekly sales vary with holidays?
+  
+#  Visualization: Boxplot of Log-transformed Weekly Sales by Holiday Flag
 
-# Merge datasets
-data <- merge(merge(merge(merge(filtered_qualifying, drivers, by = "driverId"), filtered_constructors, by = "constructorId"), races, by = "raceId"), results, by = "raceId")
+# Boxplot of Log-transformed Weekly Sales by Holiday Flag
+ggplot(Walmart_sales, aes(x = factor(Holiday_Flag), y = log(Weekly_Sales), fill = factor(Holiday_Flag))) +
+  geom_boxplot() +
+  labs(title = "Log-transformed Weekly Sales by Holiday Flag",
+       x = "Holiday Flag",
+       y = "Log(Weekly Sales)",
+       fill = "Holiday Flag") +
+  theme_minimal()
 
-# Univariate visualization - Driver nationality
-ggplot(data, aes(x = nationality.x, fill = podium)) +
-  geom_bar() +
-  labs(title = "Distribution of Podium Finishes by Driver Nationality")
+#Insight:
+  
+#  This boxplot shows the distribution of log-transformed weekly sales by holiday flag. We can observe differences in sales distribution between weeks with and without holidays.
 
-# Univariate visualization - Circuit type
-ggplot(data, aes(x = name.x, fill = podium)) +
-  geom_bar() +
-  labs(title = "Distribution of Podium Finishes by Circuit Type") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Adjust x-axis labels for better visibility
+#######################################################################################################
 
-# Remove rows with missing or non-finite values in q3
-data <- data[complete.cases(data$q3), ]
+#Multivariate Analysis
+#3. Question: How do log-transformed weekly sales relate to temperature, fuel price, CPI, and unemployment rate?
+  
+#  Visualization: Scatterplot Matrix of Log-transformed Weekly Sales and Other Variables
 
-# Convert q3 to character type and remove non-numeric characters
-data$q3 <- gsub("[^0-9.]", "", as.character(data$q3))
+# Scatterplot Matrix of Log-transformed Weekly Sales and Other Variables
+ggpairs(Walmart_sales[, c("Weekly_Sales", "Temperature", "Fuel_Price", "CPI", "Unemployment")]) +
+  theme_minimal()
 
-# Convert q3 to numeric
-data$q3 <- as.numeric(data$q3)
+#Insight:
+  
+#  The scatterplot matrix allows us to explore the relationships between log-transformed weekly sales and other variables, helping to identify potential correlations or patterns.
 
-# Create density plot
-ggplot(data, aes(x = q3, fill = podium)) +
-  geom_density(alpha = 0.5) +
-  labs(title = "Density Plot of Q3 Qualifying Times by Podium Status") +
-  scale_x_continuous(name = "Q3 Qualifying Time") +
-  scale_fill_manual(values = c("blue", "red"), labels = c("Podium", "Non-Podium"))
+#############################################################################################################
 
-# Multivariate visualization - Driver performance, Constructor performance, and Circuit type
-ggplot(data, aes(x = position, y = resultID, color = podium)) +
-  geom_point() +
-  facet_wrap(~name.x) +
-  labs(title = "Driver Performance vs. Constructor Performance by Circuit Type")
+#Multivariate Analysis
+#4. Question: Is there a difference in weekly sales trends across different stores?
+  
+#  Visualization: Line Plot of Log-transformed Weekly Sales by Store
+
+# Line Plot of Log-transformed Weekly Sales by Store
+ggplot(Walmart_sales, aes(x = as.Date(Date, "%d-%m-%Y"), y = log(Weekly_Sales), color = factor(Store))) +
+  geom_line() +
+  labs(title = "Log-transformed Weekly Sales Trends by Store",
+       x = "Date",
+       y = "Log(Weekly Sales)",
+       color = "Store")
+
+#Insight:
+  
+#  This line plot illustrates the log-transformed weekly sales trends across different stores over time, providing insights into variations in sales performance among stores.
+#By applying log transformation to the weekly sales variable, we can better handle its exponential nature and conduct meaningful exploratory data analysis to understand the dataset more effectively.

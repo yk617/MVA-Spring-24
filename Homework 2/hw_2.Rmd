@@ -1,0 +1,88 @@
+---
+title: "hw_2"
+author: "Yasasvi"
+date: "2024-02-18"
+output: html_document
+---
+
+```{r Walmart_sales}
+
+# Load required library
+library(ggplot2)
+library(dplyr)
+library(GGally)
+
+setwd("D:/MVA/Git/dataset")
+
+Walmart_sales = read.csv("Walmart_sales.csv")
+
+#Univariate Analysis
+#1. Question: What is the distribution of log-transformed weekly sales?
+  
+#  Visualization: Histogram of Log-transformed Weekly Sales
+
+# Histogram of Log-transformed Weekly Sales
+ggplot(Walmart_sales, aes(x = log(Weekly_Sales))) +
+  geom_histogram(binwidth = 0.2, fill = "skyblue", color = "black") +
+  labs(title = "Distribution of Log-transformed Weekly Sales",
+       x = "Log(Weekly Sales)",
+       y = "Frequency") +
+  theme_minimal()
+
+#Insight:
+  
+#  The histogram of log-transformed weekly sales provides a clearer view of the distribution compared to the original exponential scale.
+
+```
+```{r}
+#Bivariate Analysis
+#2. Question: How do log-transformed weekly sales vary with holidays?
+  
+#  Visualization: Boxplot of Log-transformed Weekly Sales by Holiday Flag
+
+# Boxplot of Log-transformed Weekly Sales by Holiday Flag
+ggplot(Walmart_sales, aes(x = factor(Holiday_Flag), y = log(Weekly_Sales), fill = factor(Holiday_Flag))) +
+  geom_boxplot() +
+  labs(title = "Log-transformed Weekly Sales by Holiday Flag",
+       x = "Holiday Flag",
+       y = "Log(Weekly Sales)",
+       fill = "Holiday Flag") +
+  theme_minimal()
+
+#Insight:
+  
+#  This boxplot shows the distribution of log-transformed weekly sales by holiday flag. We can observe differences in sales distribution between weeks with and without holidays.
+```
+```{r}
+#Multivariate Analysis
+#3. Question: How do log-transformed weekly sales relate to temperature, fuel price, CPI, and unemployment rate?
+  
+#  Visualization: Scatterplot Matrix of Log-transformed Weekly Sales and Other Variables
+
+# Scatterplot Matrix of Log-transformed Weekly Sales and Other Variables
+ggpairs(Walmart_sales[, c("Weekly_Sales", "Temperature", "Fuel_Price", "CPI", "Unemployment")]) +
+  theme_minimal()
+
+#Insight:
+  
+#  The scatterplot matrix allows us to explore the relationships between log-transformed weekly sales and other variables, helping to identify potential correlations or patterns.
+```
+```{r}
+#Multivariate Analysis
+#4. Question: Is there a difference in weekly sales trends across different stores?
+  
+#  Visualization: Line Plot of Log-transformed Weekly Sales by Store
+
+# Line Plot of Log-transformed Weekly Sales by Store
+ggplot(Walmart_sales, aes(x = as.Date(Date, "%d-%m-%Y"), y = log(Weekly_Sales), color = factor(Store))) +
+  geom_line() +
+  labs(title = "Log-transformed Weekly Sales Trends by Store",
+       x = "Date",
+       y = "Log(Weekly Sales)",
+       color = "Store")
+
+#Insight:
+  
+#  This line plot illustrates the log-transformed weekly sales trends across different stores over time, providing insights into variations in sales performance among stores.
+#By applying log transformation to the weekly sales variable, we can better handle its exponential nature and conduct meaningful exploratory data analysis to understand the dataset more effectively.
+```
