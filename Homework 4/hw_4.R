@@ -41,7 +41,7 @@ ggplot(pc_scores, aes(x = PC1, y = PC2)) +
   theme_minimal()
 
 # Perform K-means clustering
-kmeans_result <- kmeans(pc_scores[, c("PC1", "PC2")], centers = 3)  # Adjust the number of clusters as needed
+kmeans_result <- kmeans(pc_scores[, c("PC1", "PC2")], centers = 3)
 
 # Visualize the clusters
 plot(pc_scores$PC1, pc_scores$PC2, xlab = "PC1", ylab = "PC2", main = "Scatter plot of PC1 vs PC2")
@@ -50,16 +50,13 @@ for (i in 1:length(kmeans_result$centers[, 1])) {
   segments(kmeans_result$centers[i, 1], kmeans_result$centers[i, 2],
            pc_scores$PC1[kmeans_result$cluster == i],
            pc_scores$PC2[kmeans_result$cluster == i],
-           col = adjustcolor(i + 1, alpha.f = 0.2))  # Add lines from each point to its cluster center
+           col = adjustcolor(i + 1, alpha.f = 0.2))
 }
 legend("topright", legend = paste("Cluster", 1:3), col = 2:4, pch = 19)
 
 # Assess cluster membership
 table(kmeans_result$cluster)
-
-# Alternatively, you can add cluster membership to your original data
 pc_scores_with_clusters <- cbind(pc_scores, Cluster = kmeans_result$cluster)
-
 pc_scores_with_clusters
 
 # Plot PC1 vs PC2 with clusters
