@@ -57,12 +57,16 @@ ggplot(pc_scores, aes(x = PC3, y = PC4)) +
        y = "PC4") +
   theme_minimal()
 
-# Assess the contribution of each variable to PC1 and PC2
+# contribution of each variable to PC1 and PC2
 print(summary(pca_result))
 
-# Interpret the variate representation of each PC based on loadings
+# Interpretation of the variate representation of each PC based on loadings
+
 #PC1: This component has high loadings for variables such as Weekly_Sales, CPI (Consumer Price Index), and Unemployment. Therefore, PC1 likely represents the overall sales volume at Walmart, along with the influence of economic indicators such as CPI and unemployment rate.
+
 #PC2: PC2 has high loadings for variables like Holiday_Flag and Fuel_Price, indicating that it represents the impact of external factors such as holidays and fuel prices on sales.
+
 #PC3: With high loadings for Temperature and CPI, PC3 may represent the relationship between sales and temperature along with the impact of CPI on sales.
+
 #PC4: This component has significant loadings for variables related to Fuel_Price and Unemployment, suggesting that it represents the combined influence of these two factors on sales.
 ```
