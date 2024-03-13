@@ -1,71 +1,55 @@
+library(readr)
+library(factoextra)
 library(ggplot2)
-library(dplyr)
+
+Walmart_sales <- read_csv("D:/MVA/Git/dataset/Walmart_sales.csv")
 
 # Perform PCA
 pca_result <- prcomp(Walmart_sales[, -c(1:2)], scale. = TRUE)
 
-# Scree plot
+# Scree plot to decide number of PCs to keep
 screeplot(pca_result, type = "line", main = "Scree Plot of PCA")
 
-# Extract PC scores
-pc_scores <- as.data.frame(pca_result$x[, 1:2])
 
-pc_scores
+# Based on the scree plot, the first 4 PC's are kept
 
-# Extract loadings
-loadings <- pca_result$rotation[, 1:2]
+# Extract PC loadings
+loadings <- pca_result$rotation[, 1:4]
 
-# Set a threshold for significant loadings
-threshold <- 0.5
+# loadings for each PC
+print(loadings)
 
-# Find variables with high loadings on PC1
-variables_pc1 <- rownames(loadings)[abs(loadings[, 1]) > threshold]
+# Visualize the loadings
+fviz_pca_var(pca_result, axes = c(1, 2), col.var = "contrib",
+             gradient.cols = c("#FFCC00", "#CC9933", "#660033", "#330033"),
+             repel = TRUE)
 
-# Find variables with high loadings on PC2
-variables_pc2 <- rownames(loadings)[abs(loadings[, 2]) > threshold]
+# visualization using PCs
 
-# Combine variables from PC1 and PC2
-selected_variables <- union(variables_pc1, variables_pc2)
+# Visualize the first two PCs
+pc_scores <- as.data.frame(pca_result$x[, 1:4])
 
-# Print selected variables
-print(selected_variables)
-
-# Scatter plot of PC scores
-plot(pc_scores$PC1, pc_scores$PC2, xlab = "PC1", ylab = "PC2", main = "Scatter plot of PC1 vs PC2")
-
+# Scatter plot of PC scores for PC1 vs PC2
 ggplot(pc_scores, aes(x = PC1, y = PC2)) +
   geom_point() +
-  labs(title = "Scatter Plot of PC Scores (PC1 vs. PC2)",
+  labs(title = "Scatter Plot of PC1 vs PC2",
        x = "PC1",
        y = "PC2") +
   theme_minimal()
 
-# Perform K-means clustering
-kmeans_result <- kmeans(pc_scores[, c("PC1", "PC2")], centers = 3)
+# Scatter plot of PC scores for PC3 vs PC4
+ggplot(pc_scores, aes(x = PC3, y = PC4)) +
+  geom_point() +
+  labs(title = "Scatter Plot of PC3 vs PC4",
+       x = "PC3",
+       y = "PC4") +
+  theme_minimal()
 
-# Visualize the clusters
-plot(pc_scores$PC1, pc_scores$PC2, xlab = "PC1", ylab = "PC2", main = "Scatter plot of PC1 vs PC2")
-points(kmeans_result$centers, col = 2:4, pch = 19)  # Plot cluster centers
-for (i in 1:length(kmeans_result$centers[, 1])) {
-  segments(kmeans_result$centers[i, 1], kmeans_result$centers[i, 2],
-           pc_scores$PC1[kmeans_result$cluster == i],
-           pc_scores$PC2[kmeans_result$cluster == i],
-           col = adjustcolor(i + 1, alpha.f = 0.2))
-}
-legend("topright", legend = paste("Cluster", 1:3), col = 2:4, pch = 19)
+# Assess the contribution of each variable to PC1 and PC2
+print(summary(pca_result))
 
-# Assess cluster membership
-table(kmeans_result$cluster)
-pc_scores_with_clusters <- cbind(pc_scores, Cluster = kmeans_result$cluster)
-pc_scores_with_clusters
-
-# Plot PC1 vs PC2 with clusters
-plot(pc_scores_with_clusters$PC1, pc_scores_with_clusters$PC2, 
-     col = pc_scores_with_clusters$Cluster, 
-     pch = 19,
-     xlab = "PC1", ylab = "PC2",
-     main = "Scatter plot of PC1 vs PC2 with Clusters")
-
-# Add legend
-legend("topright", legend = unique(pc_scores_with_clusters$Cluster),
-       col = unique(pc_scores_with_clusters$Cluster), pch = 19)
+# Interpret the variate representation of each PC based on loadings
+#PC1: This component has high loadings for variables such as Weekly_Sales, CPI (Consumer Price Index), and Unemployment. Therefore, PC1 likely represents the overall sales volume at Walmart, along with the influence of economic indicators such as CPI and unemployment rate.
+#PC2: PC2 has high loadings for variables like Holiday_Flag and Fuel_Price, indicating that it represents the impact of external factors such as holidays and fuel prices on sales.
+#PC3: With high loadings for Temperature and CPI, PC3 may represent the relationship between sales and temperature along with the impact of CPI on sales.
+#PC4: This component has significant loadings for variables related to Fuel_Price and Unemployment, suggesting that it represents the combined influence of these two factors on sales.
