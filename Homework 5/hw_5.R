@@ -1,39 +1,68 @@
 library(cluster)
 library(readr)
 library(factoextra)
-library(magrittr)
 library(NbClust)
-library(ggplot2)
 
-Walmart_sales <- read.csv("D:/MVA/Git/dataset/Walmart_sales.csv")
+iris_data <- iris
 
-# hierarchical clustering
-hc <- hclust(dist(scale(Walmart_sales[, -c(1:2)])), method = "complete")
+# Hierarchical Clustering
+# Standardize the data
+scaled_iris <- scale(iris_data[, -5])
 
-# dendrogram
-plot(hc, main = "Dendrogram for Hierarchical Clustering")
+# Compute distance matrix
+dist_iris <- dist(scaled_iris)
 
-hc_clusters <- cutree(hc, k = 3)
+# hierarchical clustering using Ward's method
+hierarchical_result <- hclust(dist_iris, method = "ward.D2")
 
-# membership for each cluster
-table(hc_clusters)
+# Decide the optimal number of clusters
+# Use NbClust to determine the optimal number of clusters based on different criteria
+nbclust_result <- NbClust(scaled_iris, distance = "euclidean", min.nc = 2, max.nc = 10, method = "complete", index = "all")
 
-# K-means clustering
-kmeans_result <- kmeans(scale(Walmart_sales[, -c(1:2)]), centers = 3)
+# Visualize NbClust results
+print(nbclust_result)
 
-# membership for each cluster
+# From NbClust, select the optimal number of clusters based on the criteria you prefer
+optimal_clusters <- 3  # For example, let's choose 3 clusters
+
+# Cut the dendrogram to get cluster membership
+hierarchical_clusters <- cutree(hierarchical_result, k = optimal_clusters)
+
+# Show membership for each cluster
+table(hierarchical_clusters)
+
+# Visualize dendrogram with optimal number of clusters
+plot(hierarchical_result, main = paste("Dendrogram with", optimal_clusters, "Clusters"))
+
+# Non-hierarchical Clustering (K-means)
+# Determine the optimal number of clusters using NbClust
+nbclust_result <- NbClust(scaled_iris, distance = "euclidean", min.nc = 2, max.nc = 10, method = "kmeans", index = "all")
+
+#Explanation: NbClust provides 30 indices for determining the number of clusters, including the silhouette index, the Duda-Hart index, and the Calinski-Harabasz index, among others.
+
+#We can choose the optimal number of clusters based on the indices that show the highest values or significant changes.
+
+# Visualize NbClust results
+print(nbclust_result)
+
+# From NbClust, select the optimal number of clusters based on the criteria you prefer
+optimal_clusters_kmeans <- 3
+
+# Perform K-means clustering
+kmeans_result <- kmeans(scaled_iris, centers = optimal_clusters_kmeans, nstart = 25)
+
+# Show membership for each cluster
 table(kmeans_result$cluster)
 
-# clusters using first two Principal Components
-pca_result <- prcomp(Walmart_sales[, -c(1:2)], scale. = TRUE)
-pc_scores <- as.data.frame(pca_result$x[, 1:2])
-pc_scores_with_clusters <- cbind(pc_scores, Cluster = kmeans_result$cluster)
+# Visualize K-means clustering using the first two principal components
+# Perform PCA
+pca_result <- prcomp(scaled_iris, scale. = TRUE)
 
-# Scatter plot of PC scores
-ggplot(pc_scores_with_clusters, aes(x = PC1, y = PC2, color = factor(Cluster))) +
-  geom_point() +
-  labs(title = "Clusters and Membership Visualization (PC1 vs PC2)",
-       x = "PC1",
-       y = "PC2",
-       color = "Cluster") +
-  theme_minimal()
+# Extract PC scores
+pc_scores <- as.data.frame(pca_result$x[, 1:2])
+
+# Add cluster membership to PC scores
+pc_scores_with_clusters_kmeans <- cbind(pc_scores, Cluster = kmeans_result$cluster)
+
+# Scatter plot of PC scores with cluster membership for K-means clustering
+fviz_cluster(kmeans_result, data = pc_scores, geom = "point", stand = FALSE, main = "K-means Clustering with PC1 vs PC2")
