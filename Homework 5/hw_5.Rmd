@@ -57,8 +57,7 @@ nbclust_result <- NbClust(scaled_iris, distance = "euclidean", min.nc = 2, max.n
 # Visualize NbClust results
 print(nbclust_result)
 
-# From NbClust, select the optimal number of clusters based on the criteria you prefer
-optimal_clusters_kmeans <- 3
+optimal_clusters_kmeans <- 2
 
 # Perform K-means clustering
 kmeans_result <- kmeans(scaled_iris, centers = optimal_clusters_kmeans, nstart = 25)
