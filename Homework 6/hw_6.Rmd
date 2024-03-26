@@ -1,0 +1,104 @@
+---
+title: "hw_6"
+author: "Yasasvi"
+date: "2024-03-26"
+output: html_document
+---
+```{r}
+options(warn=-1)
+```
+
+```{r}
+library(dplyr)
+library(psych)
+library(GPArotation)
+
+Walmart_sales <- read.csv("D:/MVA/Git/dataset/Walmart_sales.csv")
+
+# Remove null values or empty spaces
+Walmart_sales <- na.omit(Walmart_sales)
+
+# Compute average values per store
+store_avg <- Walmart_sales %>%
+  group_by(Store) %>%
+  summarise(
+    Avg_Temperature = mean(Temperature, na.rm = TRUE),
+    Avg_Fuel_Price = mean(Fuel_Price, na.rm = TRUE),
+    Avg_CPI = mean(CPI, na.rm = TRUE),
+    Avg_Unemployment = mean(Unemployment, na.rm = TRUE)
+  )
+
+# structure of the resulting dataframe
+str(store_avg)
+
+# parallel analysis to determine the number of factors
+num_factor <- fa.parallel(store_avg[-1])
+
+# results of parallel analysis to determine the number of factors
+print(num_factor)
+```
+
+```{r}
+# Q1. Decide how many Factors are ideal for your dataset
+# From the parallel analysis we can see that the number of factors = 2
+```
+
+```{r}
+# Perform factor analysis with the determined number of factors
+factor_analysis <- fa(store_avg[, c("Avg_Temperature", "Avg_Fuel_Price", "Avg_CPI", "Avg_Unemployment")], 
+                      nfactors = 2, 
+                      rotate = "varimax")
+
+# factor analysis results
+print(factor_analysis)
+
+# factor loadings
+factor_loadings <- factor_analysis$loadings
+print(factor_loadings)
+```
+
+```{r}
+#Standardized Loadings (Pattern Matrix):
+
+# This section shows the loadings of each variable on each factor, representing the correlations between variables and factors.
+# Avg_Temperature has a loading of -0.14 on Factor MR1 and 0.69 on Factor MR2. This suggests a weak negative association with MR1 and a strong positive association with MR2.
+
+#SS Loadings:
+
+# SS loadings represent the sum of squared loadings for each factor, indicating the variance explained by each factor.
+# In this analysis, Factor MR1 explains 1.76 units of variance, while Factor MR2 explains 0.81 units.
+```
+
+```{r}
+#Proportion Var:
+
+# Proportion Var represents the proportion of total variance explained by each factor.
+# MR1 explains 44% of the variance, while MR2 explains 20%.
+```
+
+```{r}
+#Cumulative Var:
+
+# Cumulative Var shows the cumulative proportion of variance explained by the factors.
+# In this case, 44% of the variance is explained by MR1 alone, and 64% is explained by MR1 and MR2 together.
+```
+
+```{r}
+#Proportion:
+
+# Proportion Explained indicates the proportion of total variance explained by each factor individually.
+# MR1 explains 68% of the total variance, while MR2 explains 32%.
+```
+
+```{r}
+#Cumulative Proportion:
+
+# Cumulative Proportion shows the cumulative proportion of total variance explained by the factors.
+# In this analysis, MR1 explains 68% of the variance on its own, and both MR1 and MR2 together explain 100%.
+```
+
+```{r}
+#Visualizations
+fa.plot(factor_analysis)
+fa.diagram(factor_analysis)
+```
