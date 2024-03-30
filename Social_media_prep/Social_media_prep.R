@@ -1,0 +1,105 @@
+# Load required library
+library(stats)
+library(readr)
+library(stats)
+
+###PCA
+
+social_media_cleaned <- read.csv('D:/MVA/combined/social_media_cleaned.csv')
+
+social_media_numeric <- social_media_cleaned[, -1]
+
+# Standardize the data
+social_media_scaled <- scale(social_media_numeric)
+
+# Perform PCA
+pca_result <- prcomp(social_media_scaled, scale. = TRUE)
+
+# Summary of PCA
+summary(pca_result)
+
+# Proportion of variance explained by each principal component
+prop_var <- pca_result$sdev^2 / sum(pca_result$sdev^2)
+prop_var
+
+# Plot of the proportion of variance explained
+plot(prop_var, type = 'b', xlab = "Principal Component", ylab = "Proportion of Variance Explained", main = "Scree Plot")
+
+# Biplot (optional, if you want to visualize the relationship between variables and components)
+biplot(pca_result)
+
+akira_row <- which(social_media_cleaned$character == "AKIRA")
+
+# Plot PCA results
+plot(pca_result$x[, 1], pca_result$x[, 2], xlab = "PC1", ylab = "PC2", main = "PCA Analysis")
+
+# Mark AKIRA's position with a different color or symbol
+points(pca_result$x[akira_row, 1], pca_result$x[akira_row, 2], col = "red", pch = 19)
+
+# Add legend
+legend("topright", legend = c("Others", "AKIRA"), col = c("black", "red"), pch = c(1, 19), title = "Groups")
+
+###CLUSTER
+
+# Number of clusters
+num_clusters <- 4
+
+# Perform k-means clustering on the principal component scores
+kmeans_clusters <- kmeans(pca_result$x[, 1:2], centers = num_clusters)
+
+# Add cluster labels to the original dataset
+social_media_cleaned$cluster <- as.factor(kmeans_clusters$cluster)
+
+# Plotting the PCA results with cluster membership
+plot(pca_result$x[, 1:2], col = social_media_cleaned$cluster, pch = 19, xlab = "PC1", ylab = "PC2", main = "PCA with Cluster Analysis")
+
+# Add cluster centers to the plot
+points(kmeans_clusters$centers[, 1:2], col = 1:num_clusters, pch = 8, cex = 2)
+
+# Adding legend
+legend("topright", legend = unique(social_media_cleaned$cluster), col = 1:num_clusters, pch = 19, title = "Cluster")
+
+akira_cluster <- kmeans_clusters$cluster[social_media_cleaned$character == "AKIRA"]
+
+# Plot PCA results with cluster membership
+plot(pca_result$x[, 1], pca_result$x[, 2], col = ifelse(social_media_cleaned$cluster == akira_cluster, "red", "blue"), pch = 19, xlab = "PC1", ylab = "PC2", main = "Cluster Analysis")
+
+# Add cluster centers
+points(kmeans_clusters$centers[, 1], kmeans_clusters$centers[, 2], col = 1:num_clusters, pch = 8, cex = 2)
+
+# Add legend
+legend("topright", legend = c("Others", "AKIRA"), col = c("blue", "red"), pch = 19)
+
+# Add legend for cluster centers
+legend("bottomright", legend = paste("Cluster", 1:num_clusters), col = 1:num_clusters, pch = 8, cex = 1, title = "Cluster Centers")
+
+###FACTOR
+
+# Perform Factor Analysis
+fa_result <- factanal(social_media_scaled, factors = 3)
+
+# Print summary of Factor Analysis
+print(fa_result)
+
+# Extract factor loadings
+factor_loadings <- fa_result$loadings
+
+# Plotting Factor Loadings
+barplot(abs(factor_loadings), beside = TRUE, col = "skyblue", main = "Factor Loadings", xlab = "Variables", ylab = "Absolute Factor Loadings")
+legend("topright", legend = paste("Factor", 1:3), fill = "skyblue")
+
+# Add cluster labels to the original dataset based on k-means clustering
+social_media_cleaned$cluster <- as.factor(kmeans_clusters$cluster)
+
+# Add factor scores to the original dataset
+social_media_cleaned$factor1 <- fa_result$scores[,1]
+social_media_cleaned$factor2 <- fa_result$scores[,2]
+social_media_cleaned$factor3 <- fa_result$scores[,3]
+
+# Plotting the PCA results with factor scores and cluster membership
+plot(pca_result$x[, 1:2], col = social_media_cleaned$cluster, pch = 19, xlab = "PC1", ylab = "PC2", main = "PCA with Factor Analysis and Cluster Analysis")
+points(fa_result$scores[, 1:2], col = "red", pch = 4)
+legend("topright", legend = c("Cluster", "Factor"), col = c(1, "red"), pch = c(19, 4), title = "Groups")
+
+# Adding legend for cluster
+legend("bottomright", legend = unique(social_media_cleaned$cluster), col = 1:num_clusters, pch = 19, title = "Cluster")
