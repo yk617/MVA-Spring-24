@@ -1,0 +1,106 @@
+---
+title: "HW7"
+author: "Yasasvi"
+date: "2024-04-14"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(MASS)
+
+data(iris)
+
+str(iris)
+
+model_simple <- lm(Petal.Length ~ Sepal.Length, data = iris)
+
+summary(model_simple)
+```
+
+Multiple Regression Analysis
+
+Multiple regression analysis is a statistical method used to examine the relationship between a dependent variable and two or more independent variables. It extends simple linear regression, which deals with only one independent variable, to account for multiple predictors.
+
+In multiple regression, the goal is to model the relationship between the dependent variable and the independent variables by fitting a linear equation to observed data.
+
+Model Development
+We will load the data and convert the data into numerical. we will split the data into training and testing data. then we will perform multiple regression model
+
+Model Acceptance
+Model acceptance involves evaluating the performance of the multiple regression model on unseen data or a testing dataset
+
+It evaluates the model’s performance through coefficient summaries, diagnostic plots, and confidence intervals. Overall, it aims to assess the model’s acceptance by analyzing its fit to the data and the significance of predictor variables.
+
+Residual Analysis
+Residual analysis is crucial for evaluating the assumptions of the multiple regression model and identifying any patterns or trends in the residuals
+
+It will generate diagnostic plots, including a plot of residuals vs. fitted values, a QQ plot of residuals, and a scale-location plot. These plots can help you assess the assumptions of the multiple regression model.
+
+```{r}
+# Residual analysis for the model
+par(mfrow = c(2, 2)) # Set up a 2x2 grid for plots
+plot(model_simple)
+
+# Model Accuracy for the model
+rsquared_simple <- summary(model_simple)$r.squared
+cat("R-squared for model:", rsquared_simple, "\n")
+rmse_simple <- sqrt(mean((iris$Petal.Length - predict(model_simple))^2))
+cat("RMSE for  model:", rmse_simple, "\n")
+
+# Check acceptance of the model
+if (rsquared_simple > 0.5 & !any(model_simple$residuals > 2 | model_simple$residuals < -2)) {
+  cat("model is accepted.\n")
+} else {
+  cat("model is not accepted.\n")
+}
+
+# Fit a multiple regression model with additional predictors
+model_mult <- lm(Petal.Length ~ Sepal.Length + Sepal.Width + Petal.Width, data = iris)
+
+# Summarize the model
+summary(model_mult)
+
+# Residual analysis for the multiple regression model
+par(mfrow = c(2, 2)) # Set up a 2x2 grid for plots
+plot(model_mult)
+```
+
+Model Accuracy
+
+Model accuracy can be assessed using various metrics, such as R-squared, adjusted R-squared, and root mean squared error (RMSE).
+
+```{r}
+# Model Accuracy for the multiple regression model
+rsquared_mult <- summary(model_mult)$r.squared
+cat("R-squared for multiple regression model:", rsquared_mult, "\n")
+rmse_mult <- sqrt(mean((iris$Petal.Length - predict(model_mult))^2))
+cat("RMSE for multiple regression model:", rmse_mult, "\n")
+
+# Check acceptance of the multiple regression model
+if (rsquared_mult > 0.7 & !any(model_mult$residuals > 2 | model_mult$residuals < -2)) {
+  cat("Multiple regression model is accepted.\n")
+} else {
+  cat("Multiple regression model is not accepted.\n")
+}
+
+# Visualize the predictions for the multiple regression model
+iris_predicted_mult <- iris %>%
+  mutate(Predicted_Petal_Length_mult = predict(model_mult))
+
+ggplot(iris_predicted_mult, aes(x = Petal.Length, y = Predicted_Petal_Length_mult)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  ggtitle("Actual vs Predicted Petal Length (Multiple Regression Model)") +
+  xlab("Actual Petal Length") +
+  ylab("Predicted Petal Length")
+
+# Compare models
+cat("Comparison of model accuracies:\n")
+cat("R-squared (Simple Model):", rsquared_simple, "\n")
+cat("R-squared (Multiple Regression Model):", rsquared_mult, "\n")
+cat("RMSE (Simple Model):", rmse_simple, "\n")
+cat("RMSE (Multiple Regression Model):", rmse_mult, "\n")
+```

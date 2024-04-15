@@ -1,0 +1,65 @@
+---
+title: "social_media_hw7"
+author: "Yasasvi"
+date: "2024-04-15"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readr)
+
+social_media <- read_csv("D:/MVA/Git/dataset/social_media_cleaned.csv")
+
+# View the structure of the dataset
+str(social_media)
+
+# Filter the dataset for the character 'AKIRA'
+akira_data <- social_media %>%
+  filter(character == "AKIRA")
+
+colnames(social_media)[10] <- "Feeling"
+
+# Fit the multiple regression model
+model_akira <- lm(Feeling ~ Instagram + LinkedIn + SnapChat + Twitter + 
+                    `Whatsapp/Wechat` + youtube + OTT + Reddit, data = social_media)
+
+# Summarize the model
+summary(model_akira)
+
+# Residual analysis for the model
+par(mfrow = c(2, 2)) # Set up a 2x2 grid for plots
+plot(model_akira)
+```
+
+Model Accuracy
+
+Model accuracy can be assessed using various metrics, such as R-squared, adjusted R-squared, and root mean squared error (RMSE).
+
+```{r}
+# Model Accuracy
+rsquared_akira <- summary(model_akira)$r.squared
+cat("R-squared:", rsquared_akira, "\n")
+rmse_akira <- sqrt(mean((social_media$Feeling - predict(model_akira))^2))
+cat("RMSE:", rmse_akira, "\n")
+
+# Check acceptance of the model
+if (rsquared_akira > 0.5 & !any(model_akira$residuals > 2 | model_akira$residuals < -2)) {
+  cat("The model is accepted.\n")
+} else {
+  cat("The model is not accepted.\n")
+}
+
+# Visualize the predictions
+social_media_predicted <- social_media %>%
+  mutate(Predicted_Feeling = predict(model_akira))
+
+ggplot(social_media_predicted, aes(x = Feeling, y = Predicted_Feeling)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  ggtitle("Actual vs Predicted Feeling") +
+  xlab("Actual Feeling") +
+  ylab("Predicted Feeling")
+```
