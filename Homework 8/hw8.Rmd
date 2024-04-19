@@ -1,0 +1,85 @@
+---
+title: "hw8"
+author: "Yasasvi"
+date: "2024-04-19"
+output: html_document
+---
+
+```{r}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+library(dplyr)
+library(pROC)
+library(ggplot2)
+library(ggpubr)
+library(caret)
+
+data(iris)
+
+# Convert the species to binary classes
+iris$Species_Binary <- ifelse(iris$Species == "setosa", 1, 0)
+
+# Split the data into training and testing sets
+set.seed(123) 
+train_indices <- sample(1:nrow(iris), 0.7 * nrow(iris))  # 70% for training, 30% for testing
+train_data <- iris[train_indices, ]
+test_data <- iris[-train_indices, ]
+
+# logistic regression on the training set
+logit_model <- glm(Species_Binary ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, 
+                   data = train_data, 
+                   family = binomial)
+
+# Summary of the logistic regression model
+summary(logit_model)
+
+# Residual Analysis
+plot(logit_model)
+
+# probabilities on the testing set
+predicted_prob <- predict(logit_model, newdata = test_data, type = "response")
+
+threshold <- 0.5
+predicted_binary <- ifelse(predicted_prob > threshold, 1, 0)
+
+# Model evaluation on the testing set
+confusion <- table(predicted_binary, test_data$Species_Binary)
+accuracy <- sum(diag(confusion)) / sum(confusion)
+precision <- confusion[2, 2] / sum(confusion[, 2])
+recall <- confusion[2, 2] / sum(confusion[2, ])
+f1_score <- 2 * precision * recall / (precision + recall)
+auc <- roc(test_data$Species_Binary, predicted_prob)$auc
+
+# Model Accuracy
+cat("Accuracy:", accuracy, "\n")
+
+# other evaluation metrics
+cat("Precision:", precision, "\n")
+cat("Recall:", recall, "\n")
+cat("F1-score:", f1_score, "\n")
+cat("AUC:", auc, "\n")
+
+# Visualization of Probabilities
+hist(predicted_prob, breaks = 20, col = "lightblue", main = "Histogram of Predicted Probabilities")
+
+# Variable Importance Plot
+var_importance <- varImp(logit_model)
+ggplot(var_importance, aes(x = reorder(rownames(var_importance), Overall), y = Overall)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Variable Importance Plot", x = "Predictor Variable", y = "Importance") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# ROC Curve
+roc_curve <- roc(test_data$Species_Binary, predicted_prob)
+plot(roc_curve, main = "ROC Curve", col = "blue", lwd = 2)
+abline(a = 0, b = 1, lty = 2, col = "red")
+
+# Calibration Curve
+calibration <- data.frame(Observed = test_data$Species_Binary, Predicted = predicted_prob)
+ggplot(calibration, aes(x = Predicted, y = Observed)) +
+  geom_point(color = "blue") +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
+  labs(title = "Calibration Curve", x = "Predicted Probability", y = "Observed Probability") +
+  theme_minimal()
+```

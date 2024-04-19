@@ -1,0 +1,68 @@
+---
+title: "hw8 social_media"
+author: "Yasasvi"
+date: "2024-04-19"
+output: html_document
+---
+
+```{r}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+library(pROC)
+library(readr)
+library(dplyr)
+
+social_media_cleaned <- read_csv("D:/MVA/Git/dataset/social_media_cleaned.csv")
+
+names(social_media_cleaned) <- c("character", "Instagram", "LinkedIn", "SnapChat", 
+                                 "Twitter", "Whatsapp_Wechat", "youtube", "OTT", 
+                                 "Reddit", "How_felt_week")
+
+# Define a threshold
+threshold <- 3
+
+# Convert active_on_social_media to binary
+social_media_cleaned$active_on_social_media <- ifelse(social_media_cleaned$How_felt_week > threshold, 1, 0)
+
+# Split the dataset into training and testing sets
+set.seed(123) 
+train_indices <- sample(1:nrow(social_media_cleaned), 0.7 * nrow(social_media_cleaned))  # 70% for training, 30% for testing
+train_data <- social_media_cleaned[train_indices, ]
+test_data <- social_media_cleaned[-train_indices, ]
+
+# logistic regression on the training set
+logit_model <- glm(active_on_social_media ~ ., data = train_data[, -c(1, 10)], family = binomial)
+
+# Summary of the logistic regression model
+summary(logit_model)
+
+# Residual Analysis
+plot(logit_model, which = c(1, 2))  # Residuals vs Fitted and Normal Q-Q plot
+
+# probabilities on the testing set
+predicted_prob <- predict(logit_model, newdata = test_data, type = "response")
+
+# Prediction
+new_data <- test_data[1:10, ]
+predictions <- predict(logit_model, newdata = new_data, type = "response")
+print(predictions)
+
+# Calculate model acceptance metrics
+predicted_binary <- ifelse(predicted_prob > 0.5, 1, 0)
+confusion <- table(predicted_binary, test_data$active_on_social_media)
+accuracy <- sum(diag(confusion)) / sum(confusion)
+precision <- confusion[2, 2] / sum(confusion[, 2])
+recall <- confusion[2, 2] / sum(confusion[2, ])
+f1_score <- 2 * precision * recall / (precision + recall)
+
+# Model Accuracy
+cat("Accuracy:", accuracy, "\n")
+
+# Plot the ROC curve
+roc_curve <- roc(test_data$active_on_social_media, predicted_prob)
+plot(roc_curve, main = "ROC Curve", col = "blue", lwd = 2)
+abline(a = 0, b = 1, lty = 2, col = "red")
+
+auc_value <- auc(roc_curve)
+cat("AUC:", auc_value, "\n")
+```
