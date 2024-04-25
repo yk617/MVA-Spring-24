@@ -1,0 +1,54 @@
+---
+title: "social_media hw9"
+author: "Yasasvi"
+date: "2024-04-25"
+output: html_document
+---
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(MASS)
+library(ROCR)
+
+social_media_cleaned <- read.csv("D:/MVA/Git/dataset/social_media_cleaned.csv")
+
+social_media_cleaned$AKIRA <- ifelse(social_media_cleaned$character == "AKIRA", "AKIRA", "Other")
+
+# LDA
+lda_model <- lda(AKIRA ~ Instagram + LinkedIn + SnapChat + Twitter + Whatsapp.Wechat + youtube + OTT + Reddit + How.you.felt.the.entire.week., data = social_media_cleaned)
+lda_model
+plot(lda_model)
+
+# Summary of the LDA model
+summary(lda_model)
+
+# Predictions
+lda_predictions <- predict(lda_model, newdata = social_media_cleaned)
+lda_predictions
+
+predicted_classes <- lda_predictions$class
+predicted_classes
+
+# model accuracy
+accuracy <- mean(predicted_classes == social_media_cleaned$AKIRA)
+cat("Model Accuracy:", round(accuracy * 100, 2), "%\n")
+
+lda_scores <- lda_predictions$x
+lda_scores
+
+# Convert the predicted probabilities to a data frame
+predicted_probabilities <- as.data.frame(lda_predictions$posterior)
+predicted_probabilities
+
+pred <- prediction(predicted_probabilities[, "AKIRA"], social_media_cleaned$AKIRA == "AKIRA")
+
+roc.perf <- performance(pred, measure = "tpr", x.measure = "fpr")
+
+auc.train <- performance(pred, measure = "auc")@y.values[[1]]
+
+# Plot ROC curve
+plot(roc.perf, main = "ROC Curve", col = "blue", lwd = 2)
+abline(a = 0, b = 1, lty = 2, col = "red")
+text(x = 0.5, y = 0.3, paste("AUC = ", round(auc.train, 3), sep = ""))
+```
