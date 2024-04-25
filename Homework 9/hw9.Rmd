@@ -1,0 +1,69 @@
+---
+title: "hw9"
+author: "Yasasvi"
+date: "2024-04-25"
+output: html_document
+---
+
+```{r}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+library(MASS)
+library(ROCR)
+
+data(iris)
+```
+###Model Development
+
+Linear Discriminant Analysis (LDA) is performed on the dataset using the lda() function from the MASS package. LDA is a statistical method used for dimensionality reduction and classification. Here, the model is trained to predict the species of iris flowers based on their measurements.
+
+###Prediction
+
+The trained LDA model is used to make predictions on the same dataset (iris) using the predict() function. This step generates predictions for each observation in the dataset, including the predicted class and posterior probabilities.
+```{r}
+# LDA
+lda_model <- lda(Species ~ ., data = iris)
+
+lda_predictions <- predict(lda_model, newdata = iris)
+lda_predictions
+
+# predicted classes
+predicted_classes <- lda_predictions$class
+predicted_classes
+```
+###Model Evaluation
+
+The accuracy of the model is calculated by comparing the predicted classes with the actual classes in the dataset. This gives an indication of how well the model performs in classifying iris flowers into their respective species.
+```{r}
+# Calculate accuracy
+accuracy <- mean(predicted_classes == iris$Species)
+
+# Summary of the LDA model and accuracy
+cat("Summary of LDA Model:\n")
+print(summary(lda_model))
+print(lda_model)
+cat("\nModel Accuracy:", round(accuracy * 100, 2), "%\n")
+plot(lda_model)
+
+# discriminant scores
+lda_scores <- lda_predictions$x
+lda_scores
+
+# Convert the predicted probabilities to a data frame
+predicted_probabilities <- as.data.frame(lda_predictions$posterior)
+predicted_probabilities
+```
+###Model Accuracy
+
+```{r}
+pred <- prediction(predicted_probabilities[, "versicolor"], iris$Species == "versicolor")
+
+roc.perf <- performance(pred, measure = "tpr", x.measure = "fpr")
+
+auc.train <- performance(pred, measure = "auc")@y.values[[1]]
+
+# ROC curve
+plot(roc.perf, main = "ROC Curve", col = "blue", lwd = 2)
+abline(a = 0, b = 1, lty = 2, col = "red")
+text(x = 0.5, y = 0.3, paste("AUC = ", round(auc.train, 3), sep = ""))
+```
