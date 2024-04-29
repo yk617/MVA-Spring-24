@@ -1,0 +1,425 @@
+---
+title: "Social_media_proj"
+author: "Yasasvi"
+date: "2024-04-29"
+output: html_document
+---
+
+## PCA
+```{r}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+library(stats)
+
+social_media_cleaned <- read.csv("D:/MVA/Git/dataset/social_media_cleaned.csv")
+
+# Removes the 'character' column as it contains character names and is not relevant for PCA
+data_for_pca <- social_media_cleaned[, -1]
+
+pca_result <- prcomp(data_for_pca, scale. = TRUE)
+
+summary(pca_result)
+
+# Variance explained by each principal component
+print(pca_result$sdev^2 / sum(pca_result$sdev^2))
+
+plot(pca_result, type = "l")
+
+# Extract scores of the first four principal components
+PC_scores <- pca_result$x[, 1:4]
+PC_scores
+
+# Extract loadings
+loadings <- pca_result$rotation[, 1:4]
+print(loadings)
+
+# Scatterplot of PC1 vs PC2
+plot(PC_scores[, 1], PC_scores[, 2], xlab = "PC1", ylab = "PC2", main = "Scatterplot of PC1 vs PC2")
+
+# Scatterplot of PC1 vs PC3
+plot(PC_scores[, 1], PC_scores[, 3], xlab = "PC1", ylab = "PC3", main = "Scatterplot of PC1 vs PC3")
+
+# Scatterplot of PC2 vs PC3
+plot(PC_scores[, 2], PC_scores[, 3], xlab = "PC2", ylab = "PC3", main = "Scatterplot of PC2 vs PC3")
+```
+
+## Clustering Analysis
+
+```{r}
+library(cluster)
+
+social_media_cleaned <- read.csv("D:/MVA/Git/dataset/social_media_cleaned.csv")
+
+# Removes the character column as it is not needed for clustering
+social_media_cleaned <- social_media_cleaned[, -1]
+
+# Scale the data
+scaled_data <- scale(social_media_cleaned)
+
+wss_instagram <- numeric(10)
+for (i in 1:10) {
+  wss_instagram[i] <- sum(kmeans(scaled_data[, c("Instagram")], centers = i)$withinss)
+}
+plot(1:10, wss_instagram, type = "b", xlab = "Number of Clusters", ylab = "Within cluster sum of squares")
+
+wss_linkedin <- numeric(10)
+for (i in 1:10) {
+  wss_linkedin[i] <- sum(kmeans(scaled_data[, c("LinkedIn")], centers = i)$withinss)
+}
+plot(1:10, wss_linkedin, type = "b", xlab = "Number of Clusters", ylab = "Within cluster sum of squares")
+
+wss_snapchat <- numeric(10)
+for (i in 1:10) {
+  wss_snapchat[i] <- sum(kmeans(scaled_data[, c("SnapChat")], centers = i)$withinss)
+}
+plot(1:10, wss_snapchat, type = "b", xlab = "Number of Clusters", ylab = "Within cluster sum of squares")
+
+wss_whatsapp <- numeric(10)
+for (i in 1:10) {
+  wss_whatsapp[i] <- sum(kmeans(scaled_data[, c("Whatsapp.Wechat")], centers = i)$withinss)
+}
+plot(1:10, wss_whatsapp, type = "b", xlab = "Number of Clusters", ylab = "Within cluster sum of squares")
+
+wss_youtube <- numeric(10)
+for (i in 1:10) {
+  wss_youtube[i] <- sum(kmeans(scaled_data[, c("youtube")], centers = i)$withinss)
+}
+plot(1:10, wss_youtube, type = "b", xlab = "Number of Clusters", ylab = "Within cluster sum of squares")
+
+wss_ott <- numeric(10)
+for (i in 1:10) {
+  wss_ott[i] <- sum(kmeans(scaled_data[, c("OTT")], centers = i)$withinss)
+}
+plot(1:10, wss_ott, type = "b", xlab = "Number of Clusters", ylab = "Within cluster sum of squares")
+```
+
+```{r}
+# Determine the optimal number of clusters using elbow method
+wss <- numeric(10)
+for (i in 1:10) {
+  wss[i] <- sum(kmeans(scaled_data, centers = i)$withinss)
+}
+plot(1:10, wss, type = "b", xlab = "Number of Clusters", ylab = "Within cluster sum of squares")
+
+# Perform K-means clustering
+k <- 3
+kmeans_result <- kmeans(scaled_data, centers = k)
+
+# View the cluster assignments
+cluster_assignments <- kmeans_result$cluster
+cluster_assignments
+
+# Add cluster assignments to the original dataset
+social_media_cleaned$cluster <- cluster_assignments
+
+# Summary of clusters
+summary(social_media_cleaned$cluster)
+
+
+# Perform K-means clustering with the optimal number of clusters
+k_instagram <- 2
+kmeans_instagram <- kmeans(scaled_data[, c("Instagram")], centers = k_instagram)
+
+# View the cluster assignments
+cluster_membership_instagram <- kmeans_instagram$cluster
+cluster_membership_instagram
+
+# Perform K-means clustering with the optimal number of clusters
+k_linkedin <- 2
+kmeans_linkedin <- kmeans(scaled_data[, c("LinkedIn")], centers = k_linkedin)
+
+# View the cluster assignments
+cluster_membership_linkedin <- kmeans_linkedin$cluster
+cluster_membership_linkedin
+
+# Perform K-means clustering with the optimal number of clusters
+k_snapchat <- 4  # Example: Optimal number of clusters for SnapChat
+kmeans_snapchat <- kmeans(scaled_data[, c("SnapChat")], centers = k_snapchat)
+
+# View the cluster assignments
+cluster_membership_snapchat <- kmeans_snapchat$cluster
+cluster_membership_snapchat
+
+# Perform K-means clustering with the optimal number of clusters
+k_whatsapp <- 2
+kmeans_whatsapp <- kmeans(scaled_data[, c("Whatsapp.Wechat")], centers = k_whatsapp)
+
+# View the cluster assignments
+cluster_membership_whatsapp <- kmeans_whatsapp$cluster
+cluster_membership_whatsapp
+
+# Perform K-means clustering with the optimal number of clusters
+k_youtube <- 2
+kmeans_youtube <- kmeans(scaled_data[, c("youtube")], centers = k_youtube)
+
+# View the cluster assignments
+cluster_membership_youtube <- kmeans_youtube$cluster
+cluster_membership_youtube
+
+# Perform K-means clustering with the optimal number of clusters
+k_ott <- 2 
+kmeans_ott <- kmeans(scaled_data[, c("OTT")], centers = k_ott)
+
+# View the cluster assignments
+cluster_membership_ott <- kmeans_ott$cluster
+cluster_membership_ott
+```
+
+```{r}
+library(FactoMineR)
+
+# Perform PCA
+pca_result <- PCA(scaled_data, graph = FALSE)
+
+pc1 <- pca_result$ind$coord[,1]
+pc2 <- pca_result$ind$coord[,2]
+
+# Create a data frame with principal components and cluster membership
+pc_cluster_df <- data.frame(PC1 = pc1, PC2 = pc2, 
+                            Cluster_Instagram = cluster_membership_instagram,
+                            Cluster_Linkedin = cluster_membership_linkedin,
+                            Cluster_SnapChat = cluster_membership_snapchat,
+                            Cluster_Whatsapp = cluster_membership_whatsapp,
+                            Cluster_Youtube = cluster_membership_youtube,
+                            Cluster_OTT = cluster_membership_ott)
+
+library(ggplot2)
+
+# Instagram
+ggplot(pc_cluster_df, aes(x = PC1, y = PC2, color = factor(Cluster_Instagram))) +
+  geom_point() +
+  labs(title = "Instagram Clustering") +
+  theme_minimal()
+
+# LinkedIn
+ggplot(pc_cluster_df, aes(x = PC1, y = PC2, color = factor(Cluster_Linkedin))) +
+  geom_point() +
+  labs(title = "LinkedIn Clustering") +
+  theme_minimal()
+
+# SnapChat
+ggplot(pc_cluster_df, aes(x = PC1, y = PC2, color = factor(Cluster_SnapChat))) +
+  geom_point() +
+  labs(title = "SnapChat Clustering") +
+  theme_minimal()
+
+# Whatsapp.Wechat
+ggplot(pc_cluster_df, aes(x = PC1, y = PC2, color = factor(Cluster_Whatsapp))) +
+  geom_point() +
+  labs(title = "Whatsapp.Wechat Clustering") +
+  theme_minimal()
+
+# Youtube
+ggplot(pc_cluster_df, aes(x = PC1, y = PC2, color = factor(Cluster_Youtube))) +
+  geom_point() +
+  labs(title = "Youtube Clustering") +
+  theme_minimal()
+
+# OTT
+ggplot(pc_cluster_df, aes(x = PC1, y = PC2, color = factor(Cluster_OTT))) +
+  geom_point() +
+  labs(title = "OTT Clustering") +
+  theme_minimal()
+```
+
+## Factor Analysis
+
+```{r}
+library(psych)
+library(readr)
+
+social_media_cleaned <- read_csv("D:/MVA/Git/dataset/social_media_cleaned.csv")
+
+# Adjusting column names for factor analysis
+colnames(social_media_cleaned)[6] <- "Whatsapp.Wechat"
+colnames(social_media_cleaned)[10] <- "How.you.felt.the.entire.week."
+
+social_media_num <- social_media_cleaned[, c("Instagram", "LinkedIn", "SnapChat", "Twitter", 
+                                             "Whatsapp.Wechat", "youtube", "OTT", "Reddit", 
+                                             "How.you.felt.the.entire.week.")]
+
+# Perform factor analysis
+factor_model <- fa(social_media_num, nfactors = 3, rotate = "varimax")
+
+# Parallel analysis for determining the number of factors
+fa.parallel(social_media_num)
+
+print(factor_model)
+
+factor_loadings <- factor_model$loadings
+print(factor_loadings)
+
+fa.plot(factor_model)
+fa.diagram(factor_model)
+```
+
+## Multiple Regression
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readr)
+
+social_media <- read_csv("D:/MVA/Git/dataset/social_media_cleaned.csv")
+
+# View the structure of the dataset
+str(social_media)
+
+# Filter the dataset for the character 'AKIRA'
+akira_data <- social_media %>%
+  filter(character == "AKIRA")
+
+colnames(social_media)[10] <- "Feeling"
+
+# Fit the multiple regression model
+model_akira <- lm(Feeling ~ Instagram + LinkedIn + SnapChat + Twitter + 
+                    `Whatsapp/Wechat` + youtube + OTT + Reddit, data = social_media)
+
+# Summarize the model
+summary(model_akira)
+
+# Residual analysis for the model
+par(mfrow = c(2, 2)) # Set up a 2x2 grid for plots
+plot(model_akira)
+```
+
+Model Accuracy
+
+Model accuracy can be assessed using various metrics, such as R-squared, adjusted R-squared, and root mean squared error (RMSE).
+
+```{r}
+# Model Accuracy
+rsquared_akira <- summary(model_akira)$r.squared
+cat("R-squared:", rsquared_akira, "\n")
+rmse_akira <- sqrt(mean((social_media$Feeling - predict(model_akira))^2))
+cat("RMSE:", rmse_akira, "\n")
+
+# Check acceptance of the model
+if (rsquared_akira > 0.5 & !any(model_akira$residuals > 2 | model_akira$residuals < -2)) {
+  cat("The model is accepted.\n")
+} else {
+  cat("The model is not accepted.\n")
+}
+
+# Visualize the predictions
+social_media_predicted <- social_media %>%
+  mutate(Predicted_Feeling = predict(model_akira))
+
+ggplot(social_media_predicted, aes(x = Feeling, y = Predicted_Feeling)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  ggtitle("Actual vs Predicted Feeling") +
+  xlab("Actual Feeling") +
+  ylab("Predicted Feeling")
+```
+
+## Logistic regression
+
+```{r}
+library(pROC)
+library(readr)
+library(dplyr)
+
+social_media_cleaned <- read_csv("D:/MVA/Git/dataset/social_media_cleaned.csv")
+
+names(social_media_cleaned) <- c("character", "Instagram", "LinkedIn", "SnapChat", 
+                                 "Twitter", "Whatsapp_Wechat", "youtube", "OTT", 
+                                 "Reddit", "How_felt_week")
+
+# Define a threshold
+threshold <- 3
+
+# Convert active_on_social_media to binary
+social_media_cleaned$active_on_social_media <- ifelse(social_media_cleaned$How_felt_week > threshold, 1, 0)
+
+# Split the dataset into training and testing sets
+set.seed(123) 
+train_indices <- sample(1:nrow(social_media_cleaned), 0.7 * nrow(social_media_cleaned))  # 70% for training, 30% for testing
+train_data <- social_media_cleaned[train_indices, ]
+test_data <- social_media_cleaned[-train_indices, ]
+
+# logistic regression on the training set
+logit_model <- glm(active_on_social_media ~ ., data = train_data[, -c(1, 10)], family = binomial)
+
+# Summary of the logistic regression model
+summary(logit_model)
+
+# Residual Analysis
+plot(logit_model, which = c(1, 2))  # Residuals vs Fitted and Normal Q-Q plot
+
+# probabilities on the testing set
+predicted_prob <- predict(logit_model, newdata = test_data, type = "response")
+
+# Prediction
+new_data <- test_data[1:10, ]
+predictions <- predict(logit_model, newdata = new_data, type = "response")
+print(predictions)
+
+# Calculate model acceptance metrics
+predicted_binary <- ifelse(predicted_prob > 0.5, 1, 0)
+confusion <- table(predicted_binary, test_data$active_on_social_media)
+accuracy <- sum(diag(confusion)) / sum(confusion)
+precision <- confusion[2, 2] / sum(confusion[, 2])
+recall <- confusion[2, 2] / sum(confusion[2, ])
+f1_score <- 2 * precision * recall / (precision + recall)
+
+# Model Accuracy
+cat("Accuracy:", accuracy, "\n")
+
+# Plot the ROC curve
+roc_curve <- roc(test_data$active_on_social_media, predicted_prob)
+plot(roc_curve, main = "ROC Curve", col = "blue", lwd = 2)
+abline(a = 0, b = 1, lty = 2, col = "red")
+
+auc_value <- auc(roc_curve)
+cat("AUC:", auc_value, "\n")
+```
+
+## Discriminant Analysis
+
+```{r}
+library(MASS)
+library(ROCR)
+
+social_media_cleaned <- read.csv("D:/MVA/Git/dataset/social_media_cleaned.csv")
+
+social_media_cleaned$AKIRA <- ifelse(social_media_cleaned$character == "AKIRA", "AKIRA", "Other")
+
+# LDA
+lda_model <- lda(AKIRA ~ Instagram + LinkedIn + SnapChat + Twitter + Whatsapp.Wechat + youtube + OTT + Reddit + How.you.felt.the.entire.week., data = social_media_cleaned)
+lda_model
+plot(lda_model)
+
+# Summary of the LDA model
+summary(lda_model)
+
+# Predictions
+lda_predictions <- predict(lda_model, newdata = social_media_cleaned)
+lda_predictions
+
+predicted_classes <- lda_predictions$class
+predicted_classes
+
+# model accuracy
+accuracy <- mean(predicted_classes == social_media_cleaned$AKIRA)
+cat("Model Accuracy:", round(accuracy * 100, 2), "%\n")
+
+lda_scores <- lda_predictions$x
+lda_scores
+
+# Convert the predicted probabilities to a data frame
+predicted_probabilities <- as.data.frame(lda_predictions$posterior)
+predicted_probabilities
+
+pred <- prediction(predicted_probabilities[, "AKIRA"], social_media_cleaned$AKIRA == "AKIRA")
+
+roc.perf <- performance(pred, measure = "tpr", x.measure = "fpr")
+
+auc.train <- performance(pred, measure = "auc")@y.values[[1]]
+
+# Plot ROC curve
+plot(roc.perf, main = "ROC Curve", col = "blue", lwd = 2)
+abline(a = 0, b = 1, lty = 2, col = "red")
+text(x = 0.5, y = 0.3, paste("AUC = ", round(auc.train, 3), sep = ""))
+```
