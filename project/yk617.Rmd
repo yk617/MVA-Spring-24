@@ -1,0 +1,709 @@
+---
+title: "Project"
+author: "Yasasvi"
+date: "2024-04-28"
+output: html_document
+---
+
+Dataset: Iris dataset
+
+The Iris dataset is a classic and widely used dataset in the field of machine learning and statistics. It contains information about various attributes of iris flowers, such as sepal length, sepal width, petal length, and petal width, along with the species of iris they belong to. There are three species in the dataset: Setosa, Versicolor, and Virginica.
+
+## Questions and Data gathering
+
+<b> What are the relationships between different features? </b>
+
+<p> Understanding the correlations and dependencies between various features (such as sepal length, sepal width, petal length, and petal width) helps in grasping the underlying structure of the data. It enables us to identify patterns and potential redundancies, which can inform feature selection or dimensionality reduction techniques. </p>
+
+<b> Can we accurately classify the different iris species based on their features? </b>
+
+<p> Classification is a fundamental task in machine learning. By analyzing the Iris dataset, we can determine how well different algorithms perform in accurately classifying the iris species based on their feature measurements. </p>
+
+<b> How do the distributions of features vary across different iris species? </b>
+
+<p> Analyzing the distributions of features across different classes provides insights into the discriminative power of each feature for distinguishing between classes. <p>
+
+#### Variables
+
+  -Sepal Length: The length of the sepals (the outermost part of the flower) in centimeters.
+  -Sepal Width: The width of the sepals in centimeters.
+  -Petal Length: The length of the petals (the inner part of the flower) in centimeters.
+  -Petal Width: The width of the petals in centimeters.
+  -Species: The species of iris flower, which can take one of three values: setosa, versicolor, or             virginica.
+
+Dataset source (kaggle) : https://www.kaggle.com/datasets/uciml/iris
+
+## Exploratory Data Analysis (EDA)
+
+<p> The exploratory data analysis (EDA) is performed to gain insights and understand the characteristics of the Iris dataset, particularly focusing on the relationships between the various features (sepal length, sepal width, petal length, and petal width) across the three species of iris flowers (Setosa, Versicolor, and Virginica). </p>
+
+```{r}
+
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+library(ggplot2)
+library(dplyr)
+library(corrplot)
+library(readr)
+
+data(iris)
+
+# first few rows of the dataset
+head(iris)
+
+summary(iris)
+
+# Check for missing values
+anyNA(iris)
+
+str(iris)
+
+# Correlation Matrix
+cor(iris[,1:4])
+```
+
+<b> 1. Univariate Analysis </b>
+<p>     Histograms for each numerical variable </p>
+```{r}
+ggplot(iris, aes(x = Sepal.Length)) +
+  geom_histogram(fill = "blue", color = "black", bins = 20) +
+  labs(title = "Histogram of Sepal Length")
+
+ggplot(iris, aes(x = Sepal.Width)) +
+  geom_histogram(fill = "green", color = "black", bins = 20) +
+  labs(title = "Histogram of Sepal Width")
+
+ggplot(iris, aes(x = Petal.Length)) +
+  geom_histogram(fill = "red", color = "black", bins = 20) +
+  labs(title = "Histogram of Petal Length")
+
+ggplot(iris, aes(x = Petal.Width)) +
+  geom_histogram(fill = "orange", color = "black", bins = 20) +
+  labs(title = "Histogram of Petal Width")
+```
+
+<p> 1.The histograms show that sepal lengths are normally distributed with slight right skew. </p>
+<p> 2.The histogram indicates sepal width is most frequently around 3.0 cm, with a normal distribution across the dataset. </p>
+<p> 3.The histogram highlights a bimodal distribution of petal lengths in the iris dataset, with significant peaks at around 1 cm       and between 4-5 cm, suggesting two distinct groups within the data. </p>
+<p> 4.The histogram suggests a bimodal distribution for petal width in the Iris dataset, with most samples having small petal           widths and a smaller peak at higher widths. </p>
+
+<b> 2. Bivariate Analysis </b>
+<p>     Pairwise scatterplots colored by species </p>
+```{r}
+pairs(iris[,1:4], col = iris$Species)
+```
+<p> The scatter plot matrix shows the relationships between pairs of variables in the Iris dataset. It highlights correlations,       clusters, and distributions for each species. </p>
+
+
+<b> 3. Multivariate Anakysis </b>
+<p>     Boxplot for each numerical variable by species </p>
+```{r}
+ggplot(iris, aes(x = Species, y = Sepal.Length, fill = Species)) +
+  geom_boxplot() +
+  labs(title = "Sepal Length by Species")
+
+ggplot(iris, aes(x = Species, y = Sepal.Width, fill = Species)) +
+  geom_boxplot() +
+  labs(title = "Sepal Width by Species")
+
+ggplot(iris, aes(x = Species, y = Petal.Length, fill = Species)) +
+  geom_boxplot() +
+  labs(title = "Petal Length by Species")
+
+ggplot(iris, aes(x = Species, y = Petal.Width, fill = Species)) +
+  geom_boxplot() +
+  labs(title = "Petal Width by Species")
+```
+
+<p> 1.The box plot visualization indicates that Setosa typically has the shortest sepal length, while Virginica has the longest.        </p>  
+<p> 2.The box plot visualization indicates that Setosa typically has the shortest sepal width, while Virginica tends to have the        widest. </p>
+<p> 3.The box plot visualization suggests that Setosa typically has the shortest petal lengths, while Virginica has the longest         </p>
+<p> 4.The box plot visualization suggests that Setosa typically has the narrowest petal width, while Virginica has the widest.          </p>
+
+## Mean and Variance Analysis
+
+<p> Q. What is the average sepal length of all iris flowers in the dataset? </p>
+```{r}
+#Sepal Length Analysis
+sepal_length_mean <- mean(iris$Sepal.Length)
+print(paste("Sepal Length Mean:", sepal_length_mean))
+```
+<p> The analysis gives the average sepal length of all the flowers in the iris dataset. <p>
+
+<p> The average length of sepals across all iris flowers in the dataset is approximately 5.84 cm. </p>
+
+<p> Q.How much does the sepal length vary across all iris flowers? </p>
+```{r}
+#Sepal Length Variance
+sepal_length_var <- var(iris$Sepal.Length)
+print(paste("Variance Sepal Length:", sepal_length_var))
+```
+<p> This analysis gives the variance in sepal length across all iris flowers in the dataset, indicating how spread out the sepal lengths are from the mean. </p>
+
+<p> The variance in sepal length across all iris flowers in the dataset is approximately 0.69 cm^2, indicating how spread out the sepal lengths are from the mean. </p>
+
+```{r}
+# Sepal Width Analysis
+sepal_width_mean <- mean(iris$Sepal.Width)
+print(paste("Sepal Width Mean:", sepal_width_mean))
+```
+<p> This analysis gives the average sepal width of all the flowers in the iris dataset.
+<p> The average width of sepals across all iris flowers in the dataset is approximately 3.06 cm. </p>
+
+<p> Q.How much does the sepal width vary across all iris flowers? </p>
+```{r}
+# Sepal Width Variance
+sepal_width_var <- var(iris$Sepal.Width)
+print(paste("Variance Sepal Width:", sepal_width_var))
+```
+<p> This analysis gives the variance in sepal width across all iris flowers in the dataset, indicating how spread out the sepal widths are from the mean. </p>
+
+<p> The variance in sepal width across all iris flowers in the dataset is approximately 0.19 cm^2, indicating how spread out the sepal widths are from the mean. </p>
+
+```{r}
+# Species Analysis
+species_mean <- table(iris$Species)
+print(paste("Species Mean:", species_mean))
+```
+<p> This gives the count of each species of flowers in the iris dataset </p>
+<p> For each species of iris flowers in the dataset (setosa, versicolor, virginica), the average sepal length is provided. This helps in understanding the average size of sepals for each species. </p>
+
+```{r}
+# Species Analysis
+species_mean <- table(iris$Species)
+print(paste("Species Mean:", species_mean))
+```
+<p> This gives the count of each species of flowers in the iris dataset </p>
+
+<p> For each species of iris flowers in the dataset (setosa, versicolor, virginica), the average sepal length is provided. This helps in understanding the average size of sepals for each species. ,/p>
+
+<p> Q.How do the sepal length and sepal width correlate with each other? </p>
+```{r}
+cor(iris$Sepal.Length, iris$Sepal.Width)
+```
+<p> There is a negative correlation between sepal length and sepal width, indicating that as sepal length increases, sepal width  also tends to increase. </p>
+
+<p> Q. Is there a difference in the average petal length between different species of iris flowers?</p>
+```{r}
+aggregate(Petal.Length ~ Species, data = iris, mean)
+```
+<p> Yes, there is a difference in the average petal length between species. For example, the average petal length of setosa species is different from that of versicolor and virginica species. </p>
+
+<p> Q. Are there any outliers in the sepal length or petal width measurements? </p>
+```{r}
+boxplot(iris$Sepal.Length)
+boxplot(iris$Petal.Width)
+```
+<p> No </p>
+
+```{r}
+# Sepal Length vs. Sepal Width Analysis
+sepal_mean <- colMeans(iris[, c("Sepal.Length", "Sepal.Width")])
+print(paste("Sepal Length Mean:", sepal_mean[1], "Sepal Width Mean:", sepal_mean[2]))
+```
+<p> This analysis gives the average sepal length and sepal width of all the flowers in the iris dataset, providing insights into the average size of the sepals. </p>
+
+<p> The average sepal length and sepal width across all iris flowers in the dataset are approximately 5.84 cm and 3.06 cm respectively, providing insights into the average size of the sepals. </p>
+
+
+```{r}
+#Sepal Width and Petal Width Mean
+width_mean <- colMeans(iris[, c("Sepal.Width", "Petal.Width")])
+print(paste("Mean Sepal Width:", width_mean[1], "Mean Petal Width:", width_mean[2]))
+```
+<p> This analysis gives the average sepal width and petal width across all iris flowers in the dataset, providing insights into the average width of the sepals and petals.</p>
+
+<p> The average sepal width and petal width across all iris flowers in the dataset are approximately 3.06 cm and 1.20 cm respectively, providing insights into the average width of the sepals and petals. </p>
+
+
+```{r}
+# Species Mean
+species_mean <- aggregate(. ~ Species, data = iris, mean)
+print(species_mean)
+```
+<p> This analysis gives the average measurements of sepal length, sepal width, petal length, and petal width for each species of iris flowers in the dataset, providing insights into the average size of each part of the flower for each species. </p>
+
+<p> For each species of iris flowers in the dataset (setosa, versicolor, virginica), the average measurements of sepal length, sepal width, petal length, and petal width are provided. This helps in understanding the average size of each part of the flower for each species. </p>
+
+
+```{r}
+# Compute the variance-covariance matrix
+cov_matrix <- cov(iris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")])
+print(cov_matrix)
+```
+<p> The variance-covariance matrix shows the variances of each variable on the diagonal and the covariances between variables off the diagonal. It provides insights into how the variables vary individually and how they relate to each other </p>
+
+```{r}
+# Compute the correlation matrix
+cor_matrix <- cor(iris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")])
+print(cor_matrix)
+```
+<p> The correlation matrix shows the correlations between variables. It provides a standardized measure of the strength and direction of the linear relationship between pairs of variables. </p>
+
+```{r}
+# Sepal length distribution
+library(ggplot2)
+ggplot(iris, aes(x = Sepal.Length)) +
+  geom_histogram(fill = "skyblue", color = "black", bins = 20) +
+  labs(title = "Distribution of Sepal Length", x = "Sepal Length", y = "Frequency")
+```
+<p> This gives the distribution os sepal length. </p>
+
+```{r}
+# Sepal Length vs. Sepal Width
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+  geom_point() +
+  labs(title = "Sepal Length vs. Sepal Width", x = "Sepal Length", y = "Sepal Width")
+# scatterplot of the sepal length vs sepal width
+```
+
+```{r}
+# Boxplot of Sepal Length by Species
+ggplot(iris, aes(x = Species, y = Sepal.Length, fill = Species)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Sepal Length by Species", x = "Species", y = "Sepal Length")
+```
+
+<p> Q.Is there a significant difference in the average petal length between the different species of iris flowers? Perform an         ANOVA to test this. </p>
+```{r}
+# Perform ANOVA
+anova_result <- aov(Petal.Length ~ Species, data = iris)
+print(summary(anova_result))
+```
+<p> Analysis of variance (ANOVA) to test if there is a significant difference in the average petal length between the different       species of iris flowers. </p>
+
+<p> Q.Is there a significant difference in the mean sepal width between the setosa and virginica species? </p>
+```{r}
+t_test_result <- t.test(iris$Sepal.Width[iris$Species == "setosa"], iris$Sepal.Width[iris$Species == "virginica"])
+print(t_test_result)
+```
+<p> Yes, the t-test results show a significant difference in the mean sepal width between the setosa and virginica species (p <       0.05). </p>
+
+<p> Q.Are the variances of sepal widths significantly different between the setosa and virginica species? </p>
+```{r}
+f_test_result <- var.test(iris$Sepal.Width[iris$Species == "setosa"], iris$Sepal.Width[iris$Species == "virginica"])
+print(f_test_result)
+```
+<p> No, the F-test results show no significant difference in the variance of sepal widths between the setosa and virginica species     (p > 0.05). </p>
+
+```{r}
+# Performing ANOVA for sepal length among species
+anova_result <- aov(Sepal.Length ~ Species, data = iris)
+print(summary(anova_result))
+```
+<p> A low p-value (typically < 0.05) suggests that there are significant differences in sepal length among the species. </p>
+
+```{r}
+# Performing MANOVA for sepal length and sepal width among species
+manova_result <- manova(cbind(Sepal.Length, Sepal.Width) ~ Species, data = iris)
+print(summary(manova_result))
+```
+<p> p-value indicate whether there are significant differences in the combined dependent variables (sepal length and sepal width)     among the species. A low p-value suggests significant differences. </p>
+
+## PCA Analysis
+
+```{r}
+# Store the species column separately
+species <- iris$Species
+
+# Remove the species column from the dataset
+iris_data <- iris[, -5]
+
+# Scale the data
+scaled_data <- scale(iris_data)
+
+pca_result <- prcomp(scaled_data, center = TRUE, scale. = TRUE)
+
+# Summary of PCA
+summary(pca_result)
+
+# Biplot (shows both the observations and variables)
+biplot(pca_result, scale = 0)
+
+# Scree plot
+plot(pca_result, type = "l", main = "Scree Plot")
+
+# Variance explained by each principal component
+prop_var <- (pca_result$sdev^2) / sum(pca_result$sdev^2)
+prop_var
+```
+
+<b> To decide on the number of principal components to keep, we typically look at the scree plot, which shows the eigenvalues of each principal component. Here, we can see that a sharp drop in the eigenvalues after the first two or three components. Based on the scree plot, we decided to keep the first two principal components, as they capture the majority of the variance in the data while reducing dimensionality. </b>
+
+```{r}
+# Loadings for the first two principal components
+loadings <- pca_result$rotation[, 1:2]
+rownames(loadings) <- colnames(iris_data)
+
+loadings
+```
+
+In PCA, each principal component (PC) is a linear combination of the original variables, where the coefficients represent the loadings of each variable on that component. These loadings indicate the contribution of each variable to the principal component.
+
+Positive loading: Indicates a positive correlation between the original variable and the principal component. 
+Negative loading: Indicates a negative correlation between the original variable and the principal component. 
+
+From the above loadings we can see that
+
+Sepal Length: Has a strong positive contribution to PC1 and a negative contribution to PC2.
+Sepal Width: Negatively contributes to both PCs, more so to PC2.
+Petal Length and Width: Both have strong positive contributions to PC1, indicating they vary together.
+
+```{r}
+# Extract scores for PC1
+pc1_scores <- pca_result$x[, 1]
+
+# scatter plot using PC1 scores
+plot(pc1_scores, col = as.numeric(species), pch = 16,
+     xlab = "PC1", ylab = "PC1 Scores", main = "Scatter Plot of PC1 Scores")
+legend("topright", legend = levels(species), col = 1:length(levels(species)), pch = 16)
+```
+
+```{r}
+# Extract scores for PC2
+pc2_scores <- pca_result$x[, 2]
+
+# scatter plot using PC2 scores
+plot(pc2_scores, col = as.numeric(species), pch = 16,
+     xlab = "PC2", ylab = "PC2 Scores", main = "Scatter Plot of PC2 Scores")
+legend("topright", legend = levels(species), col = 1:length(levels(species)), pch = 16)
+```
+
+```{r}
+# scatter plot using PC1 and PC2 scores
+plot(pc1_scores, pc2_scores, col = as.numeric(species), pch = 16,
+     xlab = "PC1", ylab = "PC2", main = "Scatter Plot of PC1 vs PC2 Scores")
+legend("topright", legend = levels(species), col = 1:length(levels(species)), pch = 16)
+```
+
+## Clustering
+
+```{r}
+library(cluster)
+library(factoextra)
+library(NbClust)
+
+data <- iris[, -5]  # Exclude the species column
+
+# hierarchical clustering
+dist_matrix <- dist(data)
+hclust_model <- hclust(dist_matrix)
+
+# dendrogram
+plot(hclust_model)
+
+# Decide on the optimal number of clusters based on the dendrogram
+num_clusters_hclust <- 3
+clusters_hclust <- cutree(hclust_model, k = num_clusters_hclust)
+
+# Membership for each cluster for hierarchical clustering
+table(clusters_hclust)
+
+# Visualize cluster and membership using first two Principal Components for hierarchical clustering
+pca_result_hclust <- prcomp(data, scale = TRUE)
+fviz_cluster(list(data = pca_result_hclust$x[, 1:2], cluster = clusters_hclust))
+
+# Perform non-hierarchical clustering (k-means)
+num_clusters_kmeans <- 2
+kmeans_model <- kmeans(data, centers = num_clusters_kmeans)
+
+# Visualize cluster centers for k-means
+fviz_cluster(kmeans_model, data = data, geom = "point", frame.type = "convex", 
+             pointsize = 2, fill = "white", main = "K-means Cluster Centers")
+
+# Visualize cluster and membership using first two Principal Components for k-means
+pca_result_kmeans <- prcomp(data, scale = TRUE)
+fviz_cluster(kmeans_model, data = pca_result_kmeans$x[, 1:2], geom = "point", 
+             pointsize = 2, fill = "white", main = "K-means Clustering Result (PCA)")
+
+sil <- silhouette(kmeans_model$cluster, dist(data))
+
+fviz_silhouette(sil, main = "Silhouette Plot for K-means Clustering")
+
+# Membership for each cluster for k-means clustering
+table(kmeans_model$cluster)
+
+data_clustered <- cbind(data, Cluster = kmeans_model$cluster)
+
+# Scatter plot of data points colored by cluster membership
+plot(data_clustered[,1:2], col = data_clustered$Cluster, pch = 16, 
+     xlab = "Sepal Length", ylab = "Sepal Width",
+     main = "Scatter Plot of Clustering")
+legend("topright", legend = unique(data_clustered$Cluster), 
+       col = 1:num_clusters_kmeans, pch = 16, title = "Cluster")
+
+```
+
+## Factor Analysis
+
+```{r}
+library(psych)
+
+data(iris)
+
+# Select numerical columns for factor analysis
+data_num <- iris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")]
+
+# factor analysis
+factor_model <- fa(data_num, nfactors = 3, rotate = "varimax")
+
+# Check parallel analysis
+fa.parallel(data_num)
+
+# factor model summary
+print(factor_model)
+
+# Extract factor loadings
+factor_loadings <- factor_model$loadings
+print(factor_loadings)
+
+# Visualize factor analysis
+fa.plot(factor_model)  
+fa.diagram(factor_model)  
+```
+
+## Multiple regression
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(MASS)
+
+data(iris)
+
+str(iris)
+
+model_simple <- lm(Petal.Length ~ Sepal.Length, data = iris)
+
+summary(model_simple)
+```
+
+Multiple Regression Analysis
+
+Multiple regression analysis is a statistical method used to examine the relationship between a dependent variable and two or more independent variables. It extends simple linear regression, which deals with only one independent variable, to account for multiple predictors.
+
+In multiple regression, the goal is to model the relationship between the dependent variable and the independent variables by fitting a linear equation to observed data.
+
+Model Development
+We will load the data and convert the data into numerical. we will split the data into training and testing data. then we will perform multiple regression model
+
+Model Acceptance
+Model acceptance involves evaluating the performance of the multiple regression model on unseen data or a testing dataset
+
+It evaluates the model’s performance through coefficient summaries, diagnostic plots, and confidence intervals. Overall, it aims to assess the model’s acceptance by analyzing its fit to the data and the significance of predictor variables.
+
+Residual Analysis
+Residual analysis is crucial for evaluating the assumptions of the multiple regression model and identifying any patterns or trends in the residuals
+
+It will generate diagnostic plots, including a plot of residuals vs. fitted values, a QQ plot of residuals, and a scale-location plot. These plots can help you assess the assumptions of the multiple regression model.
+
+```{r}
+# Residual analysis for the model
+par(mfrow = c(2, 2)) # Set up a 2x2 grid for plots
+plot(model_simple)
+
+# Model Accuracy for the model
+rsquared_simple <- summary(model_simple)$r.squared
+cat("R-squared for model:", rsquared_simple, "\n")
+rmse_simple <- sqrt(mean((iris$Petal.Length - predict(model_simple))^2))
+cat("RMSE for  model:", rmse_simple, "\n")
+
+# Check acceptance of the model
+if (rsquared_simple > 0.5 & !any(model_simple$residuals > 2 | model_simple$residuals < -2)) {
+  cat("model is accepted.\n")
+} else {
+  cat("model is not accepted.\n")
+}
+
+# Fit a multiple regression model with additional predictors
+model_mult <- lm(Petal.Length ~ Sepal.Length + Sepal.Width + Petal.Width, data = iris)
+
+# Summarize the model
+summary(model_mult)
+
+# Residual analysis for the multiple regression model
+par(mfrow = c(2, 2)) # Set up a 2x2 grid for plots
+plot(model_mult)
+```
+
+Model Accuracy
+
+Model accuracy can be assessed using various metrics, such as R-squared, adjusted R-squared, and root mean squared error (RMSE).
+
+```{r}
+# Model Accuracy for the multiple regression model
+rsquared_mult <- summary(model_mult)$r.squared
+cat("R-squared for multiple regression model:", rsquared_mult, "\n")
+rmse_mult <- sqrt(mean((iris$Petal.Length - predict(model_mult))^2))
+cat("RMSE for multiple regression model:", rmse_mult, "\n")
+
+# Check acceptance of the multiple regression model
+if (rsquared_mult > 0.7 & !any(model_mult$residuals > 2 | model_mult$residuals < -2)) {
+  cat("Multiple regression model is accepted.\n")
+} else {
+  cat("Multiple regression model is not accepted.\n")
+}
+
+# Visualize the predictions for the multiple regression model
+iris_predicted_mult <- iris %>%
+  mutate(Predicted_Petal_Length_mult = predict(model_mult))
+
+ggplot(iris_predicted_mult, aes(x = Petal.Length, y = Predicted_Petal_Length_mult)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  ggtitle("Actual vs Predicted Petal Length (Multiple Regression Model)") +
+  xlab("Actual Petal Length") +
+  ylab("Predicted Petal Length")
+
+# Compare models
+cat("Comparison of model accuracies:\n")
+cat("R-squared (Simple Model):", rsquared_simple, "\n")
+cat("R-squared (Multiple Regression Model):", rsquared_mult, "\n")
+cat("RMSE (Simple Model):", rmse_simple, "\n")
+cat("RMSE (Multiple Regression Model):", rmse_mult, "\n")
+```
+
+## Logistic Regression
+
+```{r}
+library(dplyr)
+library(pROC)
+library(ggplot2)
+library(ggpubr)
+library(caret)
+
+data(iris)
+
+# Convert the species to binary classes
+iris$Species_Binary <- ifelse(iris$Species == "setosa", 1, 0)
+
+# Split the data into training and testing sets
+set.seed(123) 
+train_indices <- sample(1:nrow(iris), 0.7 * nrow(iris))  # 70% for training, 30% for testing
+train_data <- iris[train_indices, ]
+test_data <- iris[-train_indices, ]
+
+# logistic regression on the training set
+logit_model <- glm(Species_Binary ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, 
+                   data = train_data, 
+                   family = binomial)
+
+# Summary of the logistic regression model
+summary(logit_model)
+
+# Residual Analysis
+plot(logit_model)
+
+# probabilities on the testing set
+predicted_prob <- predict(logit_model, newdata = test_data, type = "response")
+
+threshold <- 0.5
+predicted_binary <- ifelse(predicted_prob > threshold, 1, 0)
+
+# Model evaluation on the testing set
+confusion <- table(predicted_binary, test_data$Species_Binary)
+accuracy <- sum(diag(confusion)) / sum(confusion)
+precision <- confusion[2, 2] / sum(confusion[, 2])
+recall <- confusion[2, 2] / sum(confusion[2, ])
+f1_score <- 2 * precision * recall / (precision + recall)
+auc <- roc(test_data$Species_Binary, predicted_prob)$auc
+
+# Model Accuracy
+cat("Accuracy:", accuracy, "\n")
+
+# other evaluation metrics
+cat("Precision:", precision, "\n")
+cat("Recall:", recall, "\n")
+cat("F1-score:", f1_score, "\n")
+cat("AUC:", auc, "\n")
+
+# Visualization of Probabilities
+hist(predicted_prob, breaks = 20, col = "lightblue", main = "Histogram of Predicted Probabilities")
+
+# Variable Importance Plot
+var_importance <- varImp(logit_model)
+ggplot(var_importance, aes(x = reorder(rownames(var_importance), Overall), y = Overall)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Variable Importance Plot", x = "Predictor Variable", y = "Importance") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# ROC Curve
+roc_curve <- roc(test_data$Species_Binary, predicted_prob)
+plot(roc_curve, main = "ROC Curve", col = "blue", lwd = 2)
+abline(a = 0, b = 1, lty = 2, col = "red")
+
+# Calibration Curve
+calibration <- data.frame(Observed = test_data$Species_Binary, Predicted = predicted_prob)
+ggplot(calibration, aes(x = Predicted, y = Observed)) +
+  geom_point(color = "blue") +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
+  labs(title = "Calibration Curve", x = "Predicted Probability", y = "Observed Probability") +
+  theme_minimal()
+```
+
+## Discriminant analysis
+
+```{r}
+
+library(MASS)
+library(ROCR)
+
+data(iris)
+```
+
+### Model Development
+
+Linear Discriminant Analysis (LDA) is performed on the dataset using the lda() function from the MASS package. LDA is a statistical method used for dimensionality reduction and classification. Here, the model is trained to predict the species of iris flowers based on their measurements.
+
+### Prediction
+
+The trained LDA model is used to make predictions on the same dataset (iris) using the predict() function. This step generates predictions for each observation in the dataset, including the predicted class and posterior probabilities.
+```{r}
+# LDA
+lda_model <- lda(Species ~ ., data = iris)
+
+lda_predictions <- predict(lda_model, newdata = iris)
+lda_predictions
+
+# predicted classes
+predicted_classes <- lda_predictions$class
+predicted_classes
+```
+### Model Evaluation
+
+The accuracy of the model is calculated by comparing the predicted classes with the actual classes in the dataset. This gives an indication of how well the model performs in classifying iris flowers into their respective species.
+```{r}
+# Calculate accuracy
+accuracy <- mean(predicted_classes == iris$Species)
+
+# Summary of the LDA model and accuracy
+cat("Summary of LDA Model:\n")
+print(summary(lda_model))
+print(lda_model)
+cat("\nModel Accuracy:", round(accuracy * 100, 2), "%\n")
+plot(lda_model)
+
+# discriminant scores
+lda_scores <- lda_predictions$x
+lda_scores
+
+# Convert the predicted probabilities to a data frame
+predicted_probabilities <- as.data.frame(lda_predictions$posterior)
+predicted_probabilities
+```
+### Model Accuracy
+
+```{r}
+pred <- prediction(predicted_probabilities[, "versicolor"], iris$Species == "versicolor")
+
+roc.perf <- performance(pred, measure = "tpr", x.measure = "fpr")
+
+auc.train <- performance(pred, measure = "auc")@y.values[[1]]
+
+# ROC curve
+plot(roc.perf, main = "ROC Curve", col = "blue", lwd = 2)
+abline(a = 0, b = 1, lty = 2, col = "red")
+text(x = 0.5, y = 0.3, paste("AUC = ", round(auc.train, 3), sep = ""))
+```
