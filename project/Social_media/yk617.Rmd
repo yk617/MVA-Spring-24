@@ -4,6 +4,317 @@ author: "Yasasvi"
 date: "2024-04-29"
 output: html_document
 ---
+##Data
+
+The data is collected from a class of 21 students who have reported their usage of social media.
+The data has 10 columns and 22 rows in total.
+The data is cumulated for each student. 
+
+Data Dictionary :
+
+character: This variable represents the character or user associated with the social media data.
+Instagram: This numerical variable indicates the usage or engagement level of the character on Instagram.
+LinkedIn: This numerical variable indicates the usage or engagement level of the character on LinkedIn.
+SnapChat: This numerical variable indicates the usage or engagement level of the character on SnapChat.
+Twitter: This numerical variable indicates the usage or engagement level of the character on Twitter.
+Whatsapp.Wechat: This numerical variable indicates the usage or engagement level of the character on WhatsApp or WeChat.
+youtube: This numerical variable indicates the usage or engagement level of the character on YouTube.
+OTT: This numerical variable indicates the usage or engagement level of the character on Over-the-Top (OTT) platforms, which typically deliver video content over the internet.
+Reddit: This numerical variable indicates the usage or engagement level of the character on Reddit, a social news aggregation and discussion website.
+How.you.felt.the.entire.week.: This integer variable represents how the character felt throughout the entire week.
+
+##EDA
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(corrplot)
+library(psych)
+
+# Read the CSV file
+social_media_final <- read.csv("D:/MVA/temp/social_media_final.csv")
+
+# View the first few rows of the data
+head(social_media_final)
+
+# Descriptive statistics
+summary(social_media_final)
+
+# Check for missing values
+sum(is.na(social_media_final))
+
+# Define the column indices for the required columns (2 to 12)
+rc <- 2:12
+
+# Subset dataframe to include only the required columns
+cor_matrix <- cor(social_media_final[, rc])
+
+# Plot correlation matrix
+corrplot(cor_matrix, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45)
+
+# Define the column indices for the required columns (2 to 12)
+rc <- 2:12
+
+# Subset dataframe to include only the required columns
+selected_data <- social_media_final[, rc]
+
+# Plot scatterplot matrix
+pairs(selected_data)
+
+# Define colors for the box plots
+boxplot_colors <- c("skyblue", "lightgreen", "salmon")
+
+# Box plots for dependent variables (columns 10, 11, and 12)
+par(mfrow = c(1, 3))  # Adjusting the layout to show plots side by side
+
+# Box plot for column 10 (Trouble_falling_asleep)
+boxplot(social_media_final[, 10], main = "Trouble falling asleep", xlab = "", col = boxplot_colors[1])
+
+# Box plot for column 11 (Mood)
+boxplot(social_media_final[, 11], main = "Mood", xlab = "", col = boxplot_colors[2])
+
+# Box plot for column 12 (Productivity)
+boxplot(social_media_final[, 12], main = "Productivity", xlab = "", col = boxplot_colors[3])
+
+# Load necessary library
+library(ggplot2)
+
+# Subset the data to include only the required variables
+selected_vars <- c("Instagram_Usage", "LinkedIn_Usage", "Snapchat_Usage", 
+                   "Twitter_Usage", "Whatsapp_Usage", "Youtube_Usage", 
+                   "OTT", "Reddit")
+
+# Create boxplots for each variable with better visualization
+boxplots <- lapply(selected_vars, function(var) {
+  ggplot(social_media_final, aes_string(y = var)) +
+    geom_boxplot(fill = "#77AADD", color = "#3366CC", alpha = 0.7) +
+    labs(title = paste("Boxplot of", var), y = var) +
+    theme_minimal() +
+    theme(plot.title = element_text(size = 14, face = "bold"),
+          axis.title.y = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.position = "none") +
+    coord_flip()  # Horizontal boxplot for better readability
+})
+
+# Arrange and display the boxplots
+gridExtra::grid.arrange(grobs = boxplots, ncol = 2)
+
+# Define colors for the histograms
+histogram_colors <- c("skyblue", "lightgreen", "salmon")
+
+# Histogram plots for dependent variables (columns 10, 11, and 12)
+par(mfrow = c(1, 3))  # Adjusting the layout to show plots side by side
+
+# Histogram plot for column 10 (Trouble_falling_asleep)
+hist(social_media_final[, 10], main = "Trouble falling asleep", xlab = "", col = histogram_colors[1])
+
+# Histogram plot for column 11 (Mood)
+hist(social_media_final[, 11], main = "Mood", xlab = "", col = histogram_colors[2])
+
+# Histogram plot for column 12 (Productivity)
+hist(social_media_final[, 12], main = "Productivity", xlab = "", col = histogram_colors[3])
+
+library(ggplot2)
+library(tidyr)
+
+# Reshape data into long format
+social_media_long <- pivot_longer(social_media_final, 
+                                  cols = c(Instagram_Usage, LinkedIn_Usage, Snapchat_Usage, 
+                                           Twitter_Usage, Whatsapp_Usage, Youtube_Usage, 
+                                           OTT, Reddit),
+                                  names_to = "variable", 
+                                  values_to = "value")
+
+# Density plots for Trouble_falling_asleep vs. continuous variables
+ggplot(social_media_long, aes(x = value, fill = factor(Trouble_falling_asleep))) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Density Plots of Various Social Media Usages by Trouble Falling Asleep",
+       x = "Usage",
+       y = "Density",
+       fill = "Trouble Falling Asleep") +
+  facet_wrap(~ variable, scales = "free_x", nrow = 3)
+
+library(ggplot2)
+library(tidyr)
+
+# Reshape data into long format
+social_media_long <- pivot_longer(social_media_final, 
+                                  cols = c(Instagram_Usage, LinkedIn_Usage, Snapchat_Usage, 
+                                           Twitter_Usage, Whatsapp_Usage, Youtube_Usage, 
+                                           OTT, Reddit),
+                                  names_to = "variable", 
+                                  values_to = "value")
+
+# Density plots for Trouble_falling_asleep vs. continuous variables
+ggplot(social_media_long, aes(x = value, fill = factor(Mood_Prod))) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Density Plots of Various Social Media Usages by mood productivity",
+       x = "Usage",
+       y = "Density",
+       fill = "mood productivity") +
+  facet_wrap(~ variable, scales = "free_x", nrow = 3)
+
+library(ggplot2)
+library(tidyr)
+
+# Reshape data into long format
+social_media_long <- pivot_longer(social_media_final, 
+                                  cols = c(Instagram_Usage, LinkedIn_Usage, Snapchat_Usage, 
+                                           Twitter_Usage, Whatsapp_Usage, Youtube_Usage, 
+                                           OTT, Reddit),
+                                  names_to = "variable", 
+                                  values_to = "value")
+
+# Density plots for Trouble_falling_asleep vs. continuous variables
+ggplot(social_media_long, aes(x = value, fill = factor(Tired_waking_up_in_morning))) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Density Plots of Various Social Media Usages by Tired_waking_up_in_morning",
+       x = "Usage",
+       y = "Density",
+       fill = "Tired_waking_up_in_morning") +
+  facet_wrap(~ variable, scales = "free_x", nrow = 3)
+
+library(ggplot2)
+library(patchwork)
+
+# Density plots for all variables
+plot_instagram <- ggplot(social_media_final, aes(x = Instagram_Usage)) +
+  geom_density(fill = "blue", alpha = 0.5) +
+  labs(title = "Distribution of Instagram Usage")
+
+plot_linkedin <- ggplot(social_media_final, aes(x = LinkedIn_Usage)) +
+  geom_density(fill = "red", alpha = 0.5) +
+  labs(title = "Distribution of LinkedIn Usage")
+
+plot_snapchat <- ggplot(social_media_final, aes(x = Snapchat_Usage)) +
+  geom_density(fill = "green", alpha = 0.5) +
+  labs(title = "Distribution of Snapchat Usage")
+
+plot_twitter <- ggplot(social_media_final, aes(x = Twitter_Usage)) +
+  geom_density(fill = "orange", alpha = 0.5) +
+  labs(title = "Distribution of Twitter Usage")
+
+plot_whatsapp <- ggplot(social_media_final, aes(x = Whatsapp_Usage)) +
+  geom_density(fill = "purple", alpha = 0.5) +
+  labs(title = "Distribution of Whatsapp Usage")
+
+plot_youtube <- ggplot(social_media_final, aes(x = Youtube_Usage)) +
+  geom_density(fill = "cyan", alpha = 0.5) +
+  labs(title = "Distribution of Youtube Usage")
+
+plot_ott <- ggplot(social_media_final, aes(x = OTT)) +
+  geom_density(fill = "magenta", alpha = 0.5) +
+  labs(title = "Distribution of OTT Usage")
+
+plot_reddit <- ggplot(social_media_final, aes(x = Reddit)) +
+  geom_density(fill = "yellow", alpha = 0.5) +
+  labs(title = "Distribution of Reddit Usage")
+
+plot_trouble <- ggplot(social_media_final, aes(x = Trouble_falling_asleep)) +
+  geom_density(fill = "blue", alpha = 0.5) +
+  labs(title = "Distribution of Trouble falling asleep")
+
+plot_mood <- ggplot(social_media_final, aes(x = Mood_Prod)) +
+  geom_density(fill = "red", alpha = 0.5) +
+  labs(title = "Distribution of Mood Productivity")
+
+plot_tired <- ggplot(social_media_final, aes(x = Tired_waking_up_in_morning)) +
+  geom_density(fill = "green", alpha = 0.5) +
+  labs(title = "Distribution of Tired waking up in morning")
+
+# Combine plots using patchwork
+combined_plots <- plot_instagram + plot_linkedin + plot_snapchat + plot_twitter +
+  plot_whatsapp + plot_youtube + plot_ott + plot_reddit + plot_trouble +
+  plot_mood + plot_tired
+
+# Print combined plots
+combined_plots
+
+# Count the occurrences of each category in the dependent variables
+trouble_falling_asleep_counts <- table(social_media_final$Trouble_falling_asleep)
+mood_prod_counts <- table(social_media_final$Mood_Prod)
+tired_waking_up_counts <- table(social_media_final$Tired_waking_up_in_morning)
+
+# Create a color palette for the pie charts
+colors <- c("#FF9999", "#66B2FF")
+
+# Create pie charts for each variable with better visualization
+par(mfrow = c(1, 3))  # Arrange plots in a 1x3 grid
+
+# Pie chart for Trouble falling asleep
+pie(trouble_falling_asleep_counts, 
+    main = "Trouble falling asleep",
+    col = colors,
+    labels = c("No", "Yes"),
+    cex = 0.8)  # Adjust label size
+
+# Pie chart for Mood Productivity
+pie(mood_prod_counts, 
+    main = "Mood Productivity",
+    col = colors,
+    labels = c("High", "Low"),
+    cex = 0.8)  # Adjust label size
+
+# Pie chart for Tired waking up in morning
+pie(tired_waking_up_counts, 
+    main = "Tired waking up in morning",
+    col = colors,
+    labels = c("No", "Yes"),
+    cex = 0.8)  # Adjust label size
+
+# Count the occurrences of each category in the dependent variables
+trouble_falling_asleep_counts <- table(social_media_final$Trouble_falling_asleep)
+mood_prod_counts <- table(social_media_final$Mood_Prod)
+tired_waking_up_counts <- table(social_media_final$Tired_waking_up_in_morning)
+
+# Create a data frame for plotting
+data <- data.frame(
+  Variable = c("Trouble falling asleep", "Mood Productivity", "Tired waking up in morning"),
+  Yes = c(trouble_falling_asleep_counts[2], mood_prod_counts[2], tired_waking_up_counts[2]),
+  No = c(trouble_falling_asleep_counts[1], mood_prod_counts[1], tired_waking_up_counts[1])
+)
+
+# Reshape the data for plotting
+library(tidyr)
+data_long <- pivot_longer(data, cols = c("Yes", "No"), names_to = "Status", values_to = "Count")
+
+# Plot the bar plot
+library(ggplot2)
+ggplot(data_long, aes(x = Variable, y = Count, fill = Status)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Counts of Yes and No for Dependent Variables",
+       x = "Dependent Variable",
+       y = "Count") +
+  scale_fill_manual(values = c("#FF9999", "#66B2FF")) +  # Custom colors for Yes and No
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+
+# Load necessary libraries if not already loaded
+library(ggplot2)
+
+# Define the dependent variables
+dependent_variables <- c("Trouble_falling_asleep", "Mood_Prod", "Tired_waking_up_in_morning")
+
+# Define the independent variables
+independent_variables <- c("Instagram_Usage", "LinkedIn_Usage", "Snapchat_Usage", 
+                           "Twitter_Usage", "Whatsapp_Usage", "Youtube_Usage", "OTT", "Reddit")
+
+# Loop through each dependent variable
+for (dep_var in dependent_variables) {
+  # Loop through each independent variable
+  for (ind_var in independent_variables) {
+    # Create a scatter plot for the relationship between the dependent and independent variables
+    plot <- ggplot(social_media_final, aes_string(x = ind_var, y = dep_var)) + 
+      geom_point() + 
+      geom_smooth(method = "lm") +
+      labs(title = paste("Relationship between", dep_var, "and", ind_var))
+    
+    # Print the plot
+    print(plot)
+  }
+}
+```
 
 ## PCA
 ```{r}
